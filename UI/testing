@@ -1,0 +1,13 @@
+import tkinter as tk
+window = tk.Tk()
+window.geometry("300x200+10+20")
+
+label = tk.Label(text ="Python, rocks!", 
+fg = "black", 
+bg = "white", 
+width =10,
+height =10)
+label.place(x=80, y=100)
+label.pack()
+
+window.mainloop()
