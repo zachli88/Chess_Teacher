@@ -67,7 +67,7 @@ def main():
     #crop(img, 400)
 
     arr = isolate_squares(cropped_image, OFFSET)
-
+ 
     cv2.imwrite('board_pics/cropped.jpg', cropped_image)
 
     err = cv2.subtract(arr[0][0], arr[0][2])
