@@ -10,7 +10,7 @@ def crop(img, offset):
     center_x = int(width/2)
     center_y = int(height/2)
 
-    cropped_image = img[center_x-offset:center_x+2*offset][center_y-offset:center_y+2*offset]
+    cropped_image = img[center_y-offset:center_y+(offset), center_x-offset:center_x+(offset)]
     cv2.imshow("select corners", cropped_image)
 
 
