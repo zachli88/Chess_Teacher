@@ -37,9 +37,8 @@ def isolate_squares(img, OFFSET):
     center_x = int(width/2)
     center_y = int(height/2)
     
-    arr = [[img]*8]*8
 
-    
+    arr = [ [img]*8 for i in range(8)]
     for i in range (8):
         for j in range (8):
              # /4 because 2*offset (because offset from center) / 8 because 8 columns/rows
@@ -112,7 +111,7 @@ def main():
         CROSSHAIR_COLOR = (200, 100, 100)
         draw_crosshairs(img, 400, CROSSHAIR_COLOR)
         cv2.imwrite('board_pics/taken.jpg', img)
-        crop(img, 400)
+        crop(img, 640)
         cv2.imwrite('board_pics/cropped.jpg', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
