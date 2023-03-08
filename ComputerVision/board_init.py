@@ -45,6 +45,7 @@ def isolate_squares(img, OFFSET):
     # center_x = int(width/2)
     # center_y = int(height/2)
     
+
     arr = [ [img]*8 for i in range(8)]
     for i in range (8):
         for j in range (8):
@@ -58,8 +59,36 @@ def isolate_squares(img, OFFSET):
     
     return arr
 
-def frame(img):
-    # img = cv2.imread('test_data/1.jpg',cv2.IMREAD_COLOR)
+
+def identify_squares(old, new):
+    diff = [[0.0]*8]*8
+    max1 = 0
+    max2 = 0
+    max1i = -1
+    max1j = -1
+    maxji = -1
+    max2j = -1
+    for i in range (8):
+        for j in range (8):
+            err = cv2.subtract(old[i][j], new[i][j])
+            diff[i*8 + j] = np.sum(err**2)
+            if diff[i*8 + j] > max1:
+                max2 = max1
+                max1 = diff[i*8 + j]
+                max12i = max1i
+                max12j = max1j
+                max1i = i
+                max1j = j
+            elif diff[i*8 + j] > max2:
+                max2 = diff[i*8 + j]
+                max2i = i
+                max2j = j
+            
+    diff.sort()
+    return (max1, max1i, max1j, max2, max2i, max2j)
+    
+def main():
+    img = cv2.imread('test_data/1.jpg',cv2.IMREAD_COLOR)
 
     height = img.shape[0]
     width  = img.shape[1]
