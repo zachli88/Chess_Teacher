@@ -2,16 +2,23 @@ import cv2
 import sys
 import numpy as np
 
-OFFSET = 640
+OFFSET = 200
+i = 0 
 
-def crop(img, offset): 
+def crop(img, offset, show): 
+    global i
     height = img.shape[0]
     width  = img.shape[1]
     center_x = int(width/2)
     center_y = int(height/2)
-
+    
     cropped_image = img[center_y-offset:center_y+(offset), center_x-offset:center_x+(offset)]
-    cv2.imshow("select corners", cropped_image)
+
+    if not show:
+        cv2.imwrite('example/' + str(i) + ".jpg", cropped_image)
+        i += 1
+        return crop
+    cv2.imshow("frame", cropped_image)
 
 
 def draw_crosshairs(img, offset, color):
@@ -22,21 +29,21 @@ def draw_crosshairs(img, offset, color):
 
     copy = img.copy()
     #                     x       y
-    cv2.drawMarker(copy, (center_x, center_y), color, markerType=cv2.MARKER_CROSS, thickness=4)
-    cv2.drawMarker(copy, (center_x-OFFSET, center_y-OFFSET), color, markerType=cv2.MARKER_CROSS, thickness=4)
-    cv2.drawMarker(copy, (center_x+OFFSET, center_y-OFFSET), color, markerType=cv2.MARKER_CROSS, thickness=4)
-    cv2.drawMarker(copy, (center_x+OFFSET, center_y+OFFSET), color, markerType=cv2.MARKER_CROSS, thickness=4)
-    cv2.drawMarker(copy, (center_x-OFFSET, center_y+OFFSET), color, markerType=cv2.MARKER_CROSS, thickness=4)
+    cv2.drawMarker(copy, (center_x, center_y), color, markerType=cv2.MARKER_CROSS, thickness=2)
+    cv2.drawMarker(copy, (center_x-offset, center_y-offset), color, markerType=cv2.MARKER_CROSS, thickness=2)
+    cv2.drawMarker(copy, (center_x+offset, center_y-offset), color, markerType=cv2.MARKER_CROSS, thickness=2)
+    cv2.drawMarker(copy, (center_x+offset, center_y+offset), color, markerType=cv2.MARKER_CROSS, thickness=2)
+    cv2.drawMarker(copy, (center_x-offset, center_y+offset), color, markerType=cv2.MARKER_CROSS, thickness=2)
 
-    cv2.imshow('align boardzzz with crosshairs', copy)
+    cv2.imshow('ch', copy)
 
 
 # creates 64 square images that measure differences between prev and cur board squares
 def isolate_squares(img, OFFSET):
     height = img.shape[0]
     width  = img.shape[1]
-    center_x = int(width/2)
-    center_y = int(height/2)
+    # center_x = int(width/2)
+    # center_y = int(height/2)
     
     arr = [ [img]*8 for i in range(8)]
     for i in range (8):
@@ -51,31 +58,31 @@ def isolate_squares(img, OFFSET):
     
     return arr
 
-def main():
-    img = cv2.imread('test_data/1.jpg',cv2.IMREAD_COLOR)
+def frame(img):
+    # img = cv2.imread('test_data/1.jpg',cv2.IMREAD_COLOR)
 
     height = img.shape[0]
     width  = img.shape[1]
-    center_x = int(width/2)
-    center_y = int(height/2 )
+    # center_x = int(width/2)
+    # center_y = int(height/2 )
     
     # Choose crosshair that is the easiest to view against board
     CROSSHAIR_COLOR = (100, 200, 100)
     draw_crosshairs(img, 400, CROSSHAIR_COLOR)
-    cropped_image =  img[center_y-OFFSET:center_y+OFFSET, center_x-OFFSET:center_x+OFFSET]
-    cv2.imshow("cropped", cropped_image)
-    #crop(img, 400)
+    # cropped_image =  img[center_y-OFFSET:center_y+OFFSET, center_x-OFFSET:center_x+OFFSET]
+    # cropped_image = crop(img, 400)
+    # cv2.imshow("cropped", cropped_image)
 
-    arr = isolate_squares(cropped_image, OFFSET)
+    # arr = isolate_squares(cropped_image, OFFSET)
  
-    cv2.imwrite('board_pics/cropped.jpg', cropped_image)
+    # cv2.imwrite('board_pics/cropped.jpg', cropped_image)
 
-    err = cv2.subtract(arr[0][0], arr[0][2])
-    err = np.sum(err**2)
-    print(err)
-    err = cv2.subtract(arr[0][3], arr[0][5])
-    err = np.sum(err**2)
-    print(err)
+    # err = cv2.subtract(arr[0][0], arr[0][2])
+    # err = np.sum(err**2)
+    # print(err)
+    # err = cv2.subtract(arr[0][3], arr[0][5])
+    # err = np.sum(err**2)
+    # print(err)
 
     # cv2.imshow('align board with crosshairs', img)
 
@@ -88,6 +95,35 @@ def main():
         cv2.imwrite('board_pics/cropped.jpg', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+def main():
+    vid = cv2.VideoCapture(0)
+    offset = 240
+    while(True):
+        ret, f = vid.read()
+        # crop(f)
+        CROSSHAIR_COLOR = (100, 100, 250)
+        
+        print(offset)
+
+        draw_crosshairs(f, offset, CROSSHAIR_COLOR)
+        # cv2.imshow('frame', f)
+        # if frame:
+            # frame(f)
+        crop(f,offset,True)
+        x = cv2.waitKey(1)
+        if x & 0xFF == ord('q'):
+            break
+        if x & 0xFF == ord('w'):
+            print("Hello!")
+            offset += 1
+        if x & 0xFF == ord('s'):
+            offset -= 1
+        if x & 0xFF == ord('s'):
+            offset -= 1
+        # if x & 0xFF == ord('t'):
+        if x & 0xFF == ord('m'):
+            crop(f, offset, False)
 
 if __name__ == '__main__':
     main()
