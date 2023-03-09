@@ -223,6 +223,7 @@ def pickupPiece():
 
 def moveToSquare(square : str):
     # finish this
+    print('hola')
 
 
 
