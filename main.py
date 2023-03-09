@@ -1,6 +1,7 @@
 import sys
 import os
 import numpy as np
+import time
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -19,9 +20,9 @@ from xarm.wrapper import XArmAPI
 
 class Arm_constants:
     # units in mm:
-    SIZE_SQUARE : float = 27
+    SIZE_SQUARE : float = 27.49
     SIZE_BOARD : float = 250
-    POS_Z_HIGHEST_PIECE : float = 50
+    POS_Z_HIGHEST_PIECE : float = 50.71
     POS_Z_BOARD : float = 0
     OFFSET_X1 : float = 0
     OFFSET_Y1 : float = 0
@@ -30,6 +31,7 @@ class Arm_constants:
     SQUARE_LOCATIONS = np.empty((8, 8), dtype=tuple)
     ROBOT_COLOR: bool = False
     ARM: XArmAPI
+    SQUARES_IN_ROW: int = 8
     # POS_Z_BASE_BOARD : int = 135
 
     # def __init__(self, size_square, size_board, pos_z_board, pos_z_highest_piece, offset_x, offset_y):
@@ -42,20 +44,15 @@ class Arm_constants:
 
 def instantiateArm():
     Arm_constants.ARM = XArmAPI('192.168.1.166')
+    Arm_constants.ARM.motion_enable(enable=True)
+    Arm_constants.ARM.set_mode(0)
+    Arm_constants.ARM.connect()
+    # Arm_constants.ARM.clean_error()
+    # Arm_constants.ARM.clean_warn()
 
-def pickup_piece ( grid_square : str): 
-    pos = get_grid_position(grid_square)
-    arm.set_position(pos[0], pos[1], pos[2] + 50, wait=True)
-
-def place_piece ( grid_square : str): 
-    pos = get_grid_position(grid_square)
-    arm.set_position(pos[0], pos[1], pos[2] + 50, wait=True)
-
-def move_piece ( grid_square1 : str, grid_square2 : str): 
-    pos1 = get_grid_position(grid_square1)
-    pos2 = get_grid_position(grid_square2)
-    arm.set_position(pos1[0], pos1[1], pos1[2] + 50, wait=True)
-    arm.set_position(pos2[0], pos2[1], pos2[2] + 50, wait=True)
+def deinstantiateArm():
+    Arm_constants.ARM.motion_enable(enable=False)
+    Arm_constants.ARM.disconnect()
 
 def calibrate():
     # code to calibrate the arm
@@ -74,25 +71,28 @@ def calibrate():
     else:
         Arm_constants.ROBOT_COLOR = False
     
+    manualMode()
+    
     trash = input("MANUALLY MOVE ARM TO " + indiciesToSquare((0,0)) + " AND PRESS ENTER")
 
-    pos = Arm_constants.ARM.position()
+    pos = Arm_constants.ARM.position
+    print (pos)
     Arm_constants.OFFSET_X1 = pos[0]
     Arm_constants.OFFSET_Y1 = pos[1]
     Arm_constants.POS_Z_BOARD = pos[2]
-    # collect data...
-    # do we need to manually enable arm movement here?
+    Arm_constants.SQUARE_LOCATIONS[0][0] = (Arm_constants.OFFSET_X1, Arm_constants.OFFSET_Y1)
 
     trash = input("MANUALLY MOVE ARM TO " + indiciesToSquare((0,7)) + " AND PRESS ENTER")
 
-    pos = Arm_constants.ARM.position()
+    pos = Arm_constants.ARM.position
+    print(pos)
     Arm_constants.OFFSET_X2 = pos[0]
     Arm_constants.OFFSET_Y2 = pos[1]
+    Arm_constants.SQUARE_LOCATIONS[0][7] = (Arm_constants.OFFSET_X2, Arm_constants.OFFSET_Y2)
     if pos[2] < Arm_constants.POS_Z_BOARD:
         Arm_constants.POS_Z_BOARD = pos[2]
-    # collect data...
-    # do we need to manually enable arm movement here?
 
+    Arm_constants.POS_Z_HIGHEST_PIECE += Arm_constants.POS_Z_BOARD
     print("PERFORMING CALCULATIONS...")
 
     deltax = Arm_constants.OFFSET_X2 - Arm_constants.OFFSET_X1
@@ -101,13 +101,32 @@ def calibrate():
     deltax /= 7
     deltay /= 7
 
-
-
-
-
-    # code to find slope and such here....
+    for i in range(1, Arm_constants.SQUARES_IN_ROW - 1):
+        newX = (Arm_constants.SQUARE_LOCATIONS[0][i - 1])[0] + deltax
+        newY = (Arm_constants.SQUARE_LOCATIONS[0][i - 1])[1] + deltay
+        Arm_constants.SQUARE_LOCATIONS[0][i] = (newX, newY)
+    
+    for i in range(1, Arm_constants.SQUARES_IN_ROW):
+        for j in range(0, Arm_constants.SQUARES_IN_ROW):
+            newX = (Arm_constants.SQUARE_LOCATIONS[i - 1][j])[0] + deltay
+            newY = (Arm_constants.SQUARE_LOCATIONS[i - 1][j])[1] + deltax
+            Arm_constants.SQUARE_LOCATIONS[i][j] = (newX, newY)
 
     print("CHECKING MOVEMENT FREEDOM...")
+
+    directedMode()
+
+    Arm_constants.ARM.open_lite6_gripper()
+
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][0][0], Arm_constants.SQUARE_LOCATIONS[7][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
 
     # code that outline board here
 
@@ -151,20 +170,78 @@ def indiciesToSquare(indices : tuple):
         y += 97
         y = chr(y)
     return (str(y) + str(x))
-    
+
+def printStatus():
+    print('------------------------------------')
+    print('Mode: ' + str(Arm_constants.ARM.mode))
+    print('State: ' + str(Arm_constants.ARM.state))
+    print('Has Error Warn: ' + str(Arm_constants.ARM.has_err_warn))
+    print('Has Error: ' + str(Arm_constants.ARM.has_error))
+    print('Has Warn: ' + str(Arm_constants.ARM.has_warn))
+    print('Error Code: ' + str(Arm_constants.ARM.error_code))
+    print('Warn Code: ' + str(Arm_constants.ARM.warn_code))
+    print('------------------------------------')
+
+def printStatusInfinite():
+    while True:
+        time.sleep(0.1)
+        print('------------------------------------')
+        print('Mode: ' + str(Arm_constants.ARM.mode))
+        print('State: ' + str(Arm_constants.ARM.state))
+        print('Has Error Warn: ' + str(Arm_constants.ARM.has_err_warn))
+        print('Has Error: ' + str(Arm_constants.ARM.has_error))
+        print('Has Warn: ' + str(Arm_constants.ARM.has_warn))
+        print('Error Code: ' + str(Arm_constants.ARM.error_code))
+        print('Warn Code: ' + str(Arm_constants.ARM.warn_code))
+        print('------------------------------------')
+
+def manualMode():
+    Arm_constants.ARM.set_mode(2)
+    Arm_constants.ARM.clean_error()
+    Arm_constants.ARM.clean_warn()
+
+    Arm_constants.ARM.set_state(0)
+
+def directedMode():
+    Arm_constants.ARM.set_mode(0)
+    Arm_constants.ARM.clean_error()
+    Arm_constants.ARM.clean_warn()
+
+    Arm_constants.ARM.set_state(0)
+
+def pickupPiece():
+    Arm_constants.ARM.open_lite6_gripper()
+    time.sleep(1)
+
+    curPos = Arm_constants.ARM.position
+    Arm_constants.ARM.set_position(curPos[0], curPos[1], Arm_constants.POS_Z_BOARD, 180, 0, 0, None, 100, 50, wait=True)
+
+    Arm_constants.ARM.close_lite6_gripper()
+    time.sleep(1)
+
+    Arm_constants.ARM.set_position(curPos[0], curPos[1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+def moveToSquare(square : str):
+    # finish this
+
+
+
+
+
+instantiateArm()
 
 calibrate()
-
 
 
 # if __name__ == "__main__":
     
 # # Create an instance of the xArmAPI object
     # arm = XArmAPI('192.168.1.166')
-#     arm.motion_enable(enable=True)
-#     arm.set_mode(0)
-#     # Connect to the robot
-#     arm.connect()
+    # arm.motion_enable(enable=True)
+    # arm.set_mode(0)
+    # # Connect to the robot
+    # arm.connect()
+    
 
 #     current_pos = arm.get_position()[1]
 #     print(current_pos)
