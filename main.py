@@ -223,15 +223,20 @@ def pickupPiece():
 
 def moveToSquare(square : str):
     # finish this
-    print('hola')
+    indices = squareToIndices(square)
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][0],
+                                    Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][0],
+                                      Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True) 
+
+    print('Moved to square ' + square)
 
 
 
+if __name__ == "__main__":
 
+    instantiateArm()
 
-instantiateArm()
-
-calibrate()
+    calibrate()
 
 
 # if __name__ == "__main__":
