@@ -221,16 +221,39 @@ def pickupPiece():
 
     Arm_constants.ARM.set_position(curPos[0], curPos[1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
 
+def dropPiece():
+    curPos = Arm_constants.ARM.position
+    Arm_constants.ARM.set_position(curPos[0], curPos[1], Arm_constants.POS_Z_BOARD, 180, 0, 0, None, 100, 50, wait=True)
+
+    Arm_constants.ARM.open_lite6_gripper()
+    time.sleep(1)
+
+    Arm_constants.ARM.set_position(curPos[0], curPos[1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+
 def moveToSquare(square : str):
     # finish this
     indices = squareToIndices(square)
     Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][0],
-                                    Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][0],
+                                    Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][1],
                                       Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True) 
 
-    print('Moved to square ' + square)
+def movePiece(square1 : str, square2 : str):
+    moveToSquare(square1)
+    pickupPiece()
+    moveToSquare(square2)
+    dropPiece()
 
+def rotate():
+    Arm_constants.ARM.set_servo_angle(1, 90, 100, 50, wait=True)
 
+def unrotate():
+    Arm_constants.ARM.set_servo_angle(1, 0, 100, 50, wait=True)
+
+def movePieceAndRotate(square1 : str, square2 : str):
+    unrotate()
+    rotate()
+    movePiece(square1, square2)
 
 if __name__ == "__main__":
 
@@ -238,23 +261,17 @@ if __name__ == "__main__":
 
     calibrate()
 
-
-# if __name__ == "__main__":
-    
-# # Create an instance of the xArmAPI object
-    # arm = XArmAPI('192.168.1.166')
-    # arm.motion_enable(enable=True)
-    # arm.set_mode(0)
-    # # Connect to the robot
-    # arm.connect()
-    
-
-#     current_pos = arm.get_position()[1]
-#     print(current_pos)
-#     arm.set_position(current_pos[0], current_pos[1], Arm_constants.POS_Z_BASE_BOARD, wait=True)
-#     #print(current_pos)
-#     # Move the arm to the target position
-#     # arm.move_to(x, y, z)
-#     #arm.reset(wait=True)
-#     # Disconnect from the robot
-#     arm.disconnect()
+    command = ""
+    print('Now you can move pieces! First input a square that has a piece to pick up, then input a target square, and voila!~')
+    print('Enter \'quit\' at any time to exit!')
+    while 'quit' not in command.lower():
+        command = input("Which square should a piece be picked up from?")
+        square1 = command.lower()
+        if 'quit' in square1:
+            break
+        command = input("Which square should the piece be moved to?")
+        square2 = command.lower()
+        if 'quit' in square2:
+            break
+        movePiece(square1, square2)
+    deinstantiateArm()
