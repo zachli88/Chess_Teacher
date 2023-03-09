@@ -28,24 +28,35 @@
         }
         
         var socket = io.connect('http://' + document.domain + ':' + location.port);
-        console.log("hello")
+        console.log("connecting...")
 
         socket.on('connect', function() {
-            console.log('check 2', socket.connected);
+            console.log('connected!', socket.connected);
         });
 
         socket.on('message', (data) => {
-            console.log("message!!")
-            console.log(data)
+            document.querySelector("#timestamp").innerHTML = Date.now();
+            // console.log("message!!")
+            // console.log(data)
             socket.emit("message",data)
             if(boardWorking && data != currentMove && data != "NA") {
+                console.log(data)
+                split = data.split(" O-O ")
+                if(split.length > 1) {
+                    console.log("castling!!! " + data)
+                    board.move(split[0])
+                    board.move(split[1])
+                } else {
+                    console.log("making move!!! " + data)
+                    board.move(data)
+                }
                 currentMove = data
-                board.move(currentMove)
             }
         });
     </script>
 </head>
 <body onload="create_board()">
     <div id="myBoard" style="width: 400px"></div>
+    <p id="timestamp"></p>
 </body>
 </html>

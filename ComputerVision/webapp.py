@@ -12,8 +12,7 @@ def index():
 
 @socketio.on('connect')
 def test_connect(conn):
-    print('connected')
-    print(conn)
+    print('client connected')
     socketio.emit('message',data=transmit_data)
 
 @socketio.on('message')
