@@ -129,13 +129,11 @@ def grid(img, diffs, board):
             
     return img, selected_move, castling#, first_pos, second_pos
 
+
 def position_to_uci(position):
     row, col = position
-    
-
     uci_col = chr(ord('a') + col)
     uci_row = str(8 - row)
-    
     return uci_col + uci_row
 
 
