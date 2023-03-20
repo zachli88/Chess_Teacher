@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/index.css') }}">
+
+    <title>Document</title>
+    <link rel="stylesheet"
+      href="https://unpkg.com/@chrisoakman/chessboard2@0.2.0/dist/chessboard2.min.css"
+      integrity="sha384-UAD3KzJ7THyDKHxQFPR2f3gGI2C/jdLP9AilbpnkGnf4b1PBvTJl6biezz0y9Vou"
+      crossorigin="anonymous">
+    
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboard2@0.2.0/dist/chessboard2.min.js"
+        integrity="sha384-xlTkh4p+HAppJTBKFmgIxsCZs94kwA015Hf5aW6tQg5/DYwnfdd1Tr+1Hvh9c4Re"
+        crossorigin="anonymous"></script>
+    <script defer src="{{ url_for('static',filename='scripts/index.js') }}"> </script>
+</head>
+<body onload="create_board()">
+    <div class="streams">
+        <div class="stream window">
+            <h2 class="title">raw</h2>
+            <img src="" alt="no image" id="raw">
+        </div>
+        <div class="stream window">
+            <h2 class="title">processed</h2>
+            <img src="" alt="no image" id="diff">
+        </div>
+        <div class="stream-c window">
+            <h2 class="title">output</h2>
+            <div class="move_panel">
+                <h1>--</h1>
+                <p>--% confident</p>
+            </div>
+        </div>
+    </div>
+    <div class="chessboard">
+        <div class="window">
+            <h2 class="title">board</h2>
+            <div id="myBoard"></div>    
+        </div>
+    </div>
+    <div class="terminal">
+        <h2 class="title">console</h2>
+        <ul>
+        </ul>
+    </div>
+</body>
+</html>

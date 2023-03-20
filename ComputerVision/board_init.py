@@ -87,43 +87,43 @@ def identify_squares(old, new):
     diff.sort()
     return (max1, max1i, max1j, max2, max2i, max2j)
     
-def main():
-    img = cv2.imread('test_data/1.jpg',cv2.IMREAD_COLOR)
+# def main():
+#     img = cv2.imread('test_data/1.jpg',cv2.IMREAD_COLOR)
 
-    height = img.shape[0]
-    width  = img.shape[1]
-    # center_x = int(width/2)
-    # center_y = int(height/2 )
+#     height = img.shape[0]
+#     width  = img.shape[1]
+#     # center_x = int(width/2)
+#     # center_y = int(height/2 )
     
-    # Choose crosshair that is the easiest to view against board
-    CROSSHAIR_COLOR = (100, 200, 100)
-    draw_crosshairs(img, 400, CROSSHAIR_COLOR)
-    # cropped_image =  img[center_y-OFFSET:center_y+OFFSET, center_x-OFFSET:center_x+OFFSET]
-    # cropped_image = crop(img, 400)
-    # cv2.imshow("cropped", cropped_image)
+#     # Choose crosshair that is the easiest to view against board
+#     CROSSHAIR_COLOR = (100, 200, 100)
+#     draw_crosshairs(img, 400, CROSSHAIR_COLOR)
+#     # cropped_image =  img[center_y-OFFSET:center_y+OFFSET, center_x-OFFSET:center_x+OFFSET]
+#     # cropped_image = crop(img, 400)
+#     # cv2.imshow("cropped", cropped_image)
 
-    # arr = isolate_squares(cropped_image, OFFSET)
+#     # arr = isolate_squares(cropped_image, OFFSET)
  
-    # cv2.imwrite('board_pics/cropped.jpg', cropped_image)
+#     # cv2.imwrite('board_pics/cropped.jpg', cropped_image)
 
-    # err = cv2.subtract(arr[0][0], arr[0][2])
-    # err = np.sum(err**2)
-    # print(err)
-    # err = cv2.subtract(arr[0][3], arr[0][5])
-    # err = np.sum(err**2)
-    # print(err)
+#     # err = cv2.subtract(arr[0][0], arr[0][2])
+#     # err = np.sum(err**2)
+#     # print(err)
+#     # err = cv2.subtract(arr[0][3], arr[0][5])
+#     # err = np.sum(err**2)
+#     # print(err)
 
-    # cv2.imshow('align board with crosshairs', img)
+#     # cv2.imshow('align board with crosshairs', img)
 
-    # when you hit enter, it'll leave the image window
-    if cv2.waitKey(0) == 32:
-        CROSSHAIR_COLOR = (200, 100, 100)
-        draw_crosshairs(img, 400, CROSSHAIR_COLOR)
-        cv2.imwrite('board_pics/taken.jpg', img)
-        crop(img, 640)
-        cv2.imwrite('board_pics/cropped.jpg', img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+#     # when you hit enter, it'll leave the image window
+#     if cv2.waitKey(0) == 32:
+#         CROSSHAIR_COLOR = (200, 100, 100)
+#         draw_crosshairs(img, 400, CROSSHAIR_COLOR)
+#         cv2.imwrite('board_pics/taken.jpg', img)
+#         crop(img, 640)
+#         cv2.imwrite('board_pics/cropped.jpg', img)
+#     cv2.waitKey(0)
+#     cv2.destroyAllWindows()
 
 def main():
     vid = cv2.VideoCapture(0)
