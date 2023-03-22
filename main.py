@@ -34,14 +34,6 @@ class Arm_constants:
     SQUARES_IN_ROW: int = 8
     # POS_Z_BASE_BOARD : int = 135
 
-    # def __init__(self, size_square, size_board, pos_z_board, pos_z_highest_piece, offset_x, offset_y):
-    #     self.SIZE_SQUARE = size_square
-    #     self.SIZE_BOARD = size_board
-    #     self.POS_Z_BOARD = pos_z_board
-    #     self.POS_Z_HIGHEST_PIECE = pos_z_highest_piece
-    #     self.OFFSET_X = offset_x
-    #     self.OFFSET_Y = offset_y
-
 def instantiateArm():
     Arm_constants.ARM = XArmAPI('192.168.1.166')
     Arm_constants.ARM.motion_enable(enable=True)
@@ -59,6 +51,10 @@ def calibrate():
     # enter a known position for the arm to move relative to the board
     # arm.set_position(0, 0, 0, wait=True)
     print("CALIBRATION SEQUENCE STARTING...\n")
+
+    Arm_constants.ARM.close_lite6_gripper()
+    time.sleep(1)
+    Arm_constants.ARM.stop_lite6_gripper()
 
     color = input("IS THE ROBOT PLAYING AS WHITE? ENTER Y OR N\n")
 
@@ -212,12 +208,14 @@ def directedMode():
 def pickupPiece():
     Arm_constants.ARM.open_lite6_gripper()
     time.sleep(1)
+    Arm_constants.ARM.stop_lite6_gripper()
 
     curPos = Arm_constants.ARM.position
     Arm_constants.ARM.set_position(curPos[0], curPos[1], Arm_constants.POS_Z_BOARD, 180, 0, 0, None, 100, 50, wait=True)
 
     Arm_constants.ARM.close_lite6_gripper()
     time.sleep(1)
+    Arm_constants.ARM.stop_lite6_gripper()
 
     Arm_constants.ARM.set_position(curPos[0], curPos[1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
 
@@ -227,12 +225,12 @@ def dropPiece():
 
     Arm_constants.ARM.open_lite6_gripper()
     time.sleep(1)
+    Arm_constants.ARM.stop_lite6_gripper()
 
     Arm_constants.ARM.set_position(curPos[0], curPos[1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
 
 
 def moveToSquare(square : str):
-    # finish this
     indices = squareToIndices(square)
     Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][0],
                                     Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][1],
@@ -252,14 +250,16 @@ def unrotate():
 
 def movePieceAndRotate(square1 : str, square2 : str):
     unrotate()
-    rotate()
     movePiece(square1, square2)
+    rotate()
 
 if __name__ == "__main__":
 
     instantiateArm()
 
     calibrate()
+
+    rotate()
 
     command = ""
     print('Now you can move pieces! First input a square that has a piece to pick up, then input a target square, and voila!~')
@@ -273,5 +273,5 @@ if __name__ == "__main__":
         square2 = command.lower()
         if 'quit' in square2:
             break
-        movePiece(square1, square2)
+        movePieceAndRotate(square1, square2)
     deinstantiateArm()
