@@ -253,6 +253,25 @@ def movePieceAndRotate(square1 : str, square2 : str):
     movePiece(square1, square2)
     rotate()
 
+# def saveCalibration(): #save POZ_Z_BOARD and SQUARE_LOCATIONS
+#     choice = input("Save calibration? (y/n): ")
+#     if choice == 'y':
+#         with open('calibration.dat', 'wb') as f:
+#             pickle.dump(Arm_constants.POS_Z_BOARD, f)
+#             pickle.dump(Arm_constants.SQUARE_LOCATIONS, f)
+#             print("Calibration saved!")
+
+# def getSavedCalibration(): #get POZ_Z_BOARD and SQUARE_LOCATIONS
+#     try:
+#         with open('calibration.txt', 'rb') as f:
+#             Arm_constants.POS_Z_BOARD = pickle.load(f)
+#             Arm_constants.SQUARE_LOCATIONS = pickle.load(f)
+#             print("Calibration loaded!")
+#             return True
+#     except:
+#         print("No saved calibration found!")
+#         return False
+
 if __name__ == "__main__":
 
     instantiateArm()
