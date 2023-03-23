@@ -67,8 +67,71 @@ def calibrate():
     else:
         Arm_constants.ROBOT_COLOR = False
     
-    manualMode()
+    load_cali = input("WOULD YOU LIKE TO LOAD CALIBRATION SAVE DATA?\n")
+
+    while 'Y' not in load_cali and 'N' not in load_cali:
+        print("PLEASE ENTER EITHER Y OR N")
+        load_cali = input("IS THE ROBOT PLAYING AS WHITE? ENTER Y OR N\n")
     
+    if 'Y' in load_cali:
+        try:
+            loadCalibration()
+        except:
+            print("LOAD PROCESS FAILED. BEGINNING RECALIBRATION SEQUENCE")
+            reCalibrate()
+    else:
+        reCalibrate()
+
+    print("CHECKING MOVEMENT FREEDOM...")
+
+    directedMode()
+
+    Arm_constants.ARM.open_lite6_gripper()
+
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][0][0], Arm_constants.SQUARE_LOCATIONS[7][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+    # code that outline board here
+
+    print("CALIBRATION COMPLETE!")
+
+    save = input("WOULD YOU LIKE TO SAVE CALIBRATION DATA? (Y/N)")
+
+    while 'Y' not in save and 'N' not in save:
+        print("PLEASE ENTER EITHER Y OR N")
+        save = input("IS THE ROBOT PLAYING AS WHITE? ENTER Y OR N\n")
+    
+    if 'Y' in save:
+        saveCalibration()
+
+
+def saveCalibration():
+    print(Arm_constants.SQUARE_LOCATIONS)
+    print(Arm_constants.POS_Z_BOARD)
+    Arm_constants.SQUARE_LOCATIONS[7][7] = (Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.POS_Z_BOARD)
+    np.save('calibration_data.npy', Arm_constants.SQUARE_LOCATIONS)
+
+def loadCalibration():
+    curFile = os.path.abspath(__file__)
+    dataFile = os.path.join(curFile, "calibration_data.npy")
+
+    Arm_constants.SQUARE_LOCATIONS = np.load(dataFile)
+    Arm_constants.POS_Z_BOARD = Arm_constants.SQUARE_LOCATIONS[7][7][1]
+    deltay = Arm_constants.SQUARE_LOCATIONS[7][6][1] - Arm_constants.SQUARE_LOCATIONS[7][5][1]
+    Arm_constants.SQUARE_LOCATIONS[7][7] = (Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][6][1] + deltay)
+    print(Arm_constants.SQUARE_LOCATIONS)
+    print(Arm_constants.POS_Z_BOARD)
+
+def reCalibrate():
+    manualMode()
+        
     trash = input("MANUALLY MOVE ARM TO " + indiciesToSquare((0,0)) + " AND PRESS ENTER")
 
     pos = Arm_constants.ARM.position
@@ -101,32 +164,13 @@ def calibrate():
         newX = (Arm_constants.SQUARE_LOCATIONS[0][i - 1])[0] + deltax
         newY = (Arm_constants.SQUARE_LOCATIONS[0][i - 1])[1] + deltay
         Arm_constants.SQUARE_LOCATIONS[0][i] = (newX, newY)
-    
+        
     for i in range(1, Arm_constants.SQUARES_IN_ROW):
         for j in range(0, Arm_constants.SQUARES_IN_ROW):
             newX = (Arm_constants.SQUARE_LOCATIONS[i - 1][j])[0] + deltay
             newY = (Arm_constants.SQUARE_LOCATIONS[i - 1][j])[1] + deltax
             Arm_constants.SQUARE_LOCATIONS[i][j] = (newX, newY)
-
-    print("CHECKING MOVEMENT FREEDOM...")
-
-    directedMode()
-
-    Arm_constants.ARM.open_lite6_gripper()
-
-    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-
-    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][0][0], Arm_constants.SQUARE_LOCATIONS[7][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-
-    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-
-    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-
-    Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-
-    # code that outline board here
-
-    print("CALIBRATION COMPLETE!")
+    
     
 
 # given a string name of square in chess notation, returns a tuple of indices into the corresponding square in the data table
