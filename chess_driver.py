@@ -11,6 +11,15 @@ white = ""
 black = ""
 
 
+def clear():
+    """
+    clears system console (os independent)
+    for aesthetics
+    """
+
+    os.system('cls' if os.name == 'nt' else 'clear')
+    
+
 def stream_img(name, img):
     _, buffer = cv2.imencode('.jpg', img)
     base64_str = base64.b64encode(buffer).decode()
@@ -40,9 +49,9 @@ def get_castle_squares(move):
     elif move == "e1c1":
         return "a1d1" 
     elif move == "e8g8":
-        return "f8h8"
+        return "h8f8"
     elif move == "e1g1":
-        return "f1h1"
+        return "h1f1"
 
 
 def position_to_uci(position):
@@ -59,6 +68,14 @@ def uci_to_position(uci_square):
     return row, col
 
 
+def get_change(current, previous):
+    if current == previous:
+        return 100.0
+    try:
+        return (abs(current - previous) / previous)
+    except ZeroDivisionError:
+        return 0
+
 def get_likely_move(board, diffs):
     move_scores = []
     board_sum = 0
@@ -68,19 +85,23 @@ def get_likely_move(board, diffs):
         t_r, t_c = uci_to_position(chess.square_name(move.to_square))
         to_sum = diffs[t_r][t_c]
         if(board.is_castling(move)):
-            print("CASTLING MOVE DETECTED!!! " + str(move))
             move_sum = (from_sum + to_sum + castle_sums(str(move), diffs))
         else:
             move_sum = from_sum+to_sum
             board_sum += move_sum
         move_scores.append([move_sum, move, f_r, f_c, t_r, t_c])
     move_scores = sorted(move_scores, reverse=True, key=lambda x: x[0])
+
+    num_elements_to_sum = min(3, len(move_scores))
+    sum_scores = sum(score for score, _, _, _, _, _ in move_scores[:num_elements_to_sum])
+
+
     selected_move = move_scores[0][1]
     castling = board.is_castling(selected_move)
     if castling:
         castling = get_castle_squares(str(selected_move))
 
-    return selected_move, castling
+    return selected_move, castling, board.san(selected_move), move_scores[0][0]/sum_scores
 
 
 def start_game(src):
@@ -88,8 +109,10 @@ def start_game(src):
    
     board = chess.Board()
 
+    print("hi")
     web = Thread(target=webapp.start, args =())
     web.start()
+    webapp.push_message("cls", "")
 
     first = True
 
@@ -98,20 +121,20 @@ def start_game(src):
         frame = bv.capture()
         if not type(frame) == np.ndarray:
             break
-        frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
         stream_img("raw", frame)
 
-        # compare move to previous position 
-        difference = bv.subtract_pos()
-        difference = cv2.rotate(difference, cv2.ROTATE_90_CLOCKWISE)
-        difference_grid = bv.rescale_grid(difference)
 
         if not first:
-            move, castling  = get_likely_move(board, difference_grid)
+            # compare move to previous position 
+            difference = bv.subtract_pos()
+            difference_grid = bv.rescale_grid(difference)
+            move, castling, san, prob  = get_likely_move(board, difference_grid)
             message = f"{str(move)[0:2]}-{str(move)[2:4]}"
             if castling:
                 message += " O-O " + castling[0:2] + "-" + castling[2:4] 
-            webapp.push_message("vis", str(message))
+            webapp.push_message("mov", str(message))
+            webapp.push_message("san", str(san))
+            webapp.push_message("prb", str(prob))
             board.push_uci(str(move))
             stream_img("diff", difference)
             
@@ -146,7 +169,7 @@ def main():
     if args.white not in ['H', 'R_ARM', 'H_ARM']:
         raise ValueError('white must be H, R_ARM, H_ARM')
     if args.black not in ['H', 'R_ARM', 'H_ARM']:
-        raise ValueError('black must be HUMAN or ROBOT')
+        raise ValueError('black must be H, R_ARM or H_ARM')
     
     white = args.white
     black = args.black
