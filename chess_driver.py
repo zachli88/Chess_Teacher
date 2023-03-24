@@ -2,6 +2,7 @@ import argparse
 import cv2
 from vision.board_vision import BoardVision
 import web.webapp as webapp
+import arm
 import numpy as np
 from threading import Thread
 import base64
@@ -109,10 +110,13 @@ def start_game(src):
    
     board = chess.Board()
 
-    print("hi")
     web = Thread(target=webapp.start, args =())
     web.start()
     webapp.push_message("cls", "")
+
+    # arm.instantiateArm()
+    # arm.calibrate()
+    # arm.rotate()
 
     first = True
 
