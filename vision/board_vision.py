@@ -85,7 +85,8 @@ class BoardVision:
         path = f"{self.src}/" + str(self.frame_iterator) + '.jpg'
         if not os.path.exists(path):
             return False
-        self.curr_cap = cv2.imread(path, cv2.IMREAD_COLOR)
+        res = cv2.imread(path, cv2.IMREAD_COLOR)
+        self.curr_cap = cv2.rotate(res, cv2.ROTATE_90_CLOCKWISE)
         self.frame_iterator += 1
         return self.curr_cap
 
@@ -97,13 +98,45 @@ class BoardVision:
         coords = self.board_coords
         if not type(coords) == list:
             return False
-        self.curr_cap = raw[coords[0]:coords[1], coords[2]:coords[3]]
+        crop = raw[coords[0]:coords[1], coords[2]:coords[3]]
+        self.curr_cap = cv2.rotate(crop, cv2.ROTATE_90_COUNTERCLOCKWISE)
         return self.curr_cap
 
     def subtract_pos(self):
-        if type(self.last_cap) == np.ndarray:
-            return cv2.absdiff(self.curr_cap, self.last_cap)
-        return False
+        side = int(self.last_cap.shape[0]/8)
+        if not type(self.last_cap) == np.ndarray:
+            return False
+        
+        kernel = np.array([[0, 2, 0],
+                          [2, 0, 2],
+                          [0, 2, 0]])
+
+        white_curr = self.curr_cap
+        white_last = self.last_cap
+        black_curr = cv2.filter2D(src=white_curr, ddepth=-1, kernel=kernel)
+        black_last = cv2.filter2D(src=white_last, ddepth=-1, kernel=kernel)
+        color = (255, 0, 0)
+
+        # return cv2.absdiff(black_curr, black_last)
+
+        white_diff = cv2.absdiff(white_curr, white_last)
+        total_diff = white_diff.copy()
+
+        black = False
+        for r in range(8):
+            black = r % 2 != 0
+            for c in range(8):
+                curr = black_curr if black else white_curr
+                last = black_last if black else white_last
+
+                sub_curr = curr[(side*r):((side*r)+side), (side*c):((side*c)+side)]
+                sub_last = last[(side*r):((side*r)+side), (side*c):((side*c)+side)]
+                sub_diff = cv2.absdiff(sub_curr, sub_last)
+                # sub_diff = cv2.rectangle(sub_diff, (1, 1),(side-1, side-1), color, 2) if black else sub_diff
+
+                total_diff[(side*r):(side*r)+sub_diff.shape[0], (side*c):(side*c)+sub_diff.shape[1]] = sub_diff
+                black = not black
+        return total_diff
     
     def rescale_grid(self, img):
         side = int(img.shape[0]/8)
