@@ -113,6 +113,11 @@ addEventListener("keydown", (event) => {
             log("web","requesting halt")
             socket.emit("client_message", "HALT")
             break
+        case "m":
+            log("web","requesting move")
+            move = prompt("enter a move or your files will be deleted")
+            socket.emit("client_message", "MOVE " + move)
+            break
         case "[":
             // log("web","requesting undo")
             // socket.emit("client_message", "UNDO ")

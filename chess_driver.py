@@ -110,17 +110,33 @@ def start_game(src):
    
     board = chess.Board()
 
-    web = Thread(target=webapp.start, args =())
-    web.start()
-    webapp.push_message("cls", "")
-
     # arm.instantiateArm()
     # arm.calibrate()
     # arm.rotate()
 
+    web = Thread(target=webapp.start, args =())
+    web.start()
+    webapp.push_message("cls", "")
+    stream_img("raw", frame)
+
     first = True
+    white = True
 
     while True:
+        # wait for next move / other instruction from webapp
+        req = webapp.await_message()
+        reqSplit = req.split(" ")
+        if reqSplit[0] == "HALT":
+            print('quitting...')
+            web.join()
+            break
+        if reqSplit[0] == "MOVE":
+            # firstSquare = moveSplit[:2]
+            # secondSquare = moveSplit[2:]
+            arm.movePieceAndRotate()
+            print("making move")
+        print(req)
+
         # capture move
         frame = bv.capture()
         if not type(frame) == np.ndarray:
@@ -133,6 +149,8 @@ def start_game(src):
             difference = bv.subtract_pos()
             difference_grid = bv.rescale_grid(difference)
             move, castling, san, prob  = get_likely_move(board, difference_grid)
+
+
             message = f"{str(move)[0:2]}-{str(move)[2:4]}"
             if castling:
                 message += " O-O " + castling[0:2] + "-" + castling[2:4] 
@@ -143,15 +161,7 @@ def start_game(src):
             stream_img("diff", difference)
             
         first = False
-
-
-        # wait for next move / other instruction from webapp
-        req = webapp.await_message()
-        if req == "HALT":
-            print('quitting...')
-            web.join()
-            break
-        print(req)
+        white = not white
 
 
 def main():
