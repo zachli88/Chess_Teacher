@@ -123,14 +123,15 @@ def saveCalibration():
 
 def loadCalibration():
     curFile = os.path.abspath(__file__)
-    dataFile = os.path.join(curFile, "calibration_data.npy")
+    dataFile = os.path.join(os.path.dirname(curFile), "calibration_data.npy")
+    # print(dataFile)
 
-    Arm_constants.SQUARE_LOCATIONS = np.load(dataFile)
+    Arm_constants.SQUARE_LOCATIONS = np.load(dataFile, allow_pickle=True)
     Arm_constants.POS_Z_BOARD = Arm_constants.SQUARE_LOCATIONS[7][7][1]
     deltay = Arm_constants.SQUARE_LOCATIONS[7][6][1] - Arm_constants.SQUARE_LOCATIONS[7][5][1]
     Arm_constants.SQUARE_LOCATIONS[7][7] = (Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][6][1] + deltay)
-    print(Arm_constants.SQUARE_LOCATIONS)
-    print(Arm_constants.POS_Z_BOARD)
+    # print(Arm_constants.SQUARE_LOCATIONS)
+    # print(Arm_constants.POS_Z_BOARD)
 
 def reCalibrate():
     manualMode()
@@ -319,7 +320,9 @@ def movePieceAndRotate(square1 : str, square2 : str):
 #         print("No saved calibration found!")
 #         return False
 
-if __name__ == "__main__":
+# loadCalibration()
+
+def testing():
 
     instantiateArm()
 
@@ -341,3 +344,5 @@ if __name__ == "__main__":
             break
         movePieceAndRotate(square1, square2)
     deinstantiateArm()
+
+testing()
