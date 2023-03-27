@@ -26,6 +26,7 @@ def connect():
 def incoming(data):
     incoming_queue.put(data)
     print("recieved req from client")
+    print("req info: " + data)
     
 
 def post_message():
