@@ -130,6 +130,7 @@ def loadCalibration():
     Arm_constants.POS_Z_BOARD = Arm_constants.SQUARE_LOCATIONS[7][7][1]
     deltay = Arm_constants.SQUARE_LOCATIONS[7][6][1] - Arm_constants.SQUARE_LOCATIONS[7][5][1]
     Arm_constants.SQUARE_LOCATIONS[7][7] = (Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][6][1] + deltay)
+    Arm_constants.POS_Z_HIGHEST_PIECE += Arm_constants.POS_Z_BOARD
     # print(Arm_constants.SQUARE_LOCATIONS)
     # print(Arm_constants.POS_Z_BOARD)
 
