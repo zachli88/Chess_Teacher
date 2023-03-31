@@ -110,21 +110,28 @@ def start_game(src):
    
     board = chess.Board()
 
-    # arm.instantiateArm()
-    # arm.calibrate()
-    # arm.rotate()
+    arm.instantiateArm()
+    arm.calibrate()
+    arm.rotate()
 
     web = Thread(target=webapp.start, args =())
     web.start()
     webapp.push_message("cls", "")
-    stream_img("raw", frame)
 
     first = True
     white = True
 
     while True:
+        # capture move
+        frame = bv.capture()
+        if not type(frame) == np.ndarray:
+            break
+        stream_img("raw", frame)
+
+
         # wait for next move / other instruction from webapp
         req = webapp.await_message()
+        force_move = False
         reqSplit = req.split(" ")
         if reqSplit[0] == "HALT":
             print('quitting...')
@@ -133,27 +140,33 @@ def start_game(src):
         if reqSplit[0] == "MOVE":
             # firstSquare = moveSplit[:2]
             # secondSquare = moveSplit[2:]
-            arm.movePieceAndRotate()
+            arm.movePieceAndRotate(reqSplit[1], reqSplit[2])
+            force_move = reqSplit[1] + reqSplit[2]
+            first = False
             print("making move")
+        if reqSplit[0] == "NEXT":
+            print("getting next")
         print(req)
 
-        # capture move
+        # capture after move
         frame = bv.capture()
         if not type(frame) == np.ndarray:
             break
-        stream_img("raw", frame)
-
+        stream_img("diff", frame)
+        
 
         if not first:
-            # compare move to previous position 
+            # compare move to previous position
             difference = bv.subtract_pos()
             difference_grid = bv.rescale_grid(difference)
             move, castling, san, prob  = get_likely_move(board, difference_grid)
-
+            if force_move:
+                move = force_move
 
             message = f"{str(move)[0:2]}-{str(move)[2:4]}"
             if castling:
-                message += " O-O " + castling[0:2] + "-" + castling[2:4] 
+                message += " O-O " + castling[0:2] + "-" + castling[2:4]
+            print(move)
             webapp.push_message("mov", str(message))
             webapp.push_message("san", str(san))
             webapp.push_message("prb", str(prob))

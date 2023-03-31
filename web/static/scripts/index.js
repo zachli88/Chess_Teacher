@@ -123,7 +123,6 @@ addEventListener("keydown", (event) => {
             // socket.emit("client_message", "UNDO ")
             break
         default:
-            log("key", event.key)
             break
     }
 });

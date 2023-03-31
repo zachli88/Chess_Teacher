@@ -99,7 +99,7 @@ class BoardVision:
         if not type(coords) == list:
             return False
         crop = raw[coords[0]:coords[1], coords[2]:coords[3]]
-        self.curr_cap = cv2.rotate(crop, cv2.ROTATE_90_CLOCKWISE)
+        self.curr_cap = cv2.rotate(crop, cv2.ROTATE_90_COUNTERCLOCKWISE)
         return self.curr_cap
 
     def subtract_pos(self):
