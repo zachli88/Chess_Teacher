@@ -46,7 +46,7 @@ def deinstantiateArm():
     Arm_constants.ARM.motion_enable(enable=False)
     Arm_constants.ARM.disconnect()
 
-def calibrate():
+def calibrate(unsafe = False, robot_known_white = False):
     # code to calibrate the arm
     # enter a known position for the arm to move relative to the board
     # arm.set_position(0, 0, 0, wait=True)
@@ -56,17 +56,16 @@ def calibrate():
     time.sleep(1)
     Arm_constants.ARM.stop_lite6_gripper()
 
-    color = input("IS THE ROBOT PLAYING AS WHITE? ENTER Y OR N\n")
-
-    while 'Y' not in color and 'N' not in color:
-        print("PLEASE ENTER EITHER Y OR N")
+    if not robot_known_white:
         color = input("IS THE ROBOT PLAYING AS WHITE? ENTER Y OR N\n")
-    
-    if 'Y' in color:
-        Arm_constants.ROBOT_COLOR = True
+
+        while 'Y' not in color and 'N' not in color:
+            print("PLEASE ENTER EITHER Y OR N")
+            color = input("IS THE ROBOT PLAYING AS WHITE? ENTER Y OR N\n")
+        
+        Arm_constants.ROBOT_COLOR = 'Y' in color
     else:
-        Arm_constants.ROBOT_COLOR = False
-    
+        Arm_constants.ROBOT_COLOR = True
     load_cali = input("WOULD YOU LIKE TO LOAD CALIBRATION SAVE DATA?\n")
 
     while 'Y' not in load_cali and 'N' not in load_cali:
@@ -91,15 +90,12 @@ def calibrate():
     time.sleep(1)
     Arm_constants.ARM.stop_lite6_gripper()
 
-    # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-
-    # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][0][0], Arm_constants.SQUARE_LOCATIONS[7][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-
-    # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-
-    # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-
-    # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+    if not unsafe:
+        Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][0][0], Arm_constants.SQUARE_LOCATIONS[7][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
 
     # code that outline board here
 

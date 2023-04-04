@@ -1,23 +1,20 @@
 import argparse
 import cv2
 from vision.board_vision import BoardVision
+import vision.chess_conversions as cc
 import web.webapp as webapp
 import arm
 import numpy as np
 from threading import Thread
 import base64
 import chess
+import os
 
 white = ""
 black = ""
 
 
 def clear():
-    """
-    clears system console (os independent)
-    for aesthetics
-    """
-
     os.system('cls' if os.name == 'nt' else 'clear')
     
 
@@ -27,66 +24,16 @@ def stream_img(name, img):
     webapp.push_message("cv2", name, base64_str)
 
 
-def coord_sum(uci, diffs):
-    r, c = uci_to_position(uci)
-    return diffs[r][c]
-
-
-def castle_sums(move, diffs):
-    if move == "e8c8":
-        return coord_sum("a8", diffs) + coord_sum("d8", diffs)
-    elif move == "e1c1":
-        return coord_sum("a1", diffs) + coord_sum("d1", diffs)
-    elif move == "e8g8":
-        return coord_sum("f8", diffs) + coord_sum("h8", diffs)
-    elif move == "e1g1":
-        return coord_sum("f1", diffs) + coord_sum("h1", diffs)
-    return 0
-
-
-def get_castle_squares(move):
-    if move == "e8c8":
-        return "a8d8"
-    elif move == "e1c1":
-        return "a1d1" 
-    elif move == "e8g8":
-        return "h8f8"
-    elif move == "e1g1":
-        return "h1f1"
-
-
-def position_to_uci(position):
-    row, col = position
-    uci_col = chr(ord('a') + col)
-    uci_row = str(8 - row)
-    return uci_col + uci_row
-
-
-def uci_to_position(uci_square):
-    file, rank = uci_square[0], int(uci_square[1])
-    row = 8 - rank
-    col = ord(file) - ord('a')
-    return row, col
-
-
-def get_change(current, previous):
-    if current == previous:
-        return 100.0
-    try:
-        return (abs(current - previous) / previous)
-    except ZeroDivisionError:
-        return 0
-
-def get_likely_move(board, diffs):
+def get_likely_move(game, diffs):
     move_scores = []
     board_sum = 0
-    for move in board.legal_moves:
-        f_r, f_c = uci_to_position(chess.square_name(move.from_square))
+    for move in game.legal_moves:
+        f_r, f_c = cc.uci_to_position(chess.square_name(move.from_square))
         from_sum = diffs[f_r][f_c]
-        t_r, t_c = uci_to_position(chess.square_name(move.to_square))
+        t_r, t_c = cc.uci_to_position(chess.square_name(move.to_square))
         to_sum = diffs[t_r][t_c]
-        if(board.is_castling(move)):
-            move_sum = (from_sum + to_sum + castle_sums(str(move), diffs))
+        if(game.is_castling(move)):
+            move_sum = (from_sum + to_sum + cc.castle_sums(str(move), diffs))
         else:
             move_sum = from_sum+to_sum
             board_sum += move_sum
@@ -98,11 +45,11 @@ def get_likely_move(board, diffs):
 
 
     selected_move = move_scores[0][1]
-    castling = board.is_castling(selected_move)
+    castling = game.is_castling(selected_move)
     if castling:
-        castling = get_castle_squares(str(selected_move))
+        castling = cc.get_castle_squares(str(selected_move))
 
-    return selected_move, castling, board.san(selected_move), move_scores[0][0]/sum_scores
+    return selected_move, castling, game.san(selected_move), move_scores[0][0]/sum_scores
 
 
 def start_game(src):
@@ -110,23 +57,22 @@ def start_game(src):
    
     board = chess.Board()
 
-    arm.instantiateArm()
-    arm.calibrate()
-    arm.rotate()
+    # arm.instantiateArm()
+    # arm.calibrate()
+    # arm.rotate()
 
     web = Thread(target=webapp.start, args =())
     web.start()
     webapp.push_message("cls", "")
 
-    first = True
     white = True
 
     while True:
-        # capture move
-        frame = bv.capture()
-        if not type(frame) == np.ndarray:
+        # capture pre-move position
+        before = bv.capture()
+        if not type(before) == np.ndarray:
             break
-        stream_img("raw", frame)
+        stream_img("raw", before)
 
 
         # wait for next move / other instruction from webapp
@@ -138,42 +84,41 @@ def start_game(src):
             web.join()
             break
         if reqSplit[0] == "MOVE":
-            # firstSquare = moveSplit[:2]
-            # secondSquare = moveSplit[2:]
-            arm.movePieceAndRotate(reqSplit[1], reqSplit[2])
+            if len(reqSplit) < 3:
+                print("ERROR: NOT ENOUGH PARAMS IN MOVE (EXPECTED 3) + ", reqSplit)
+                break;
             force_move = reqSplit[1] + reqSplit[2]
-            first = False
             print("making move")
-        if reqSplit[0] == "NEXT":
+        if reqSplit[0] == "NEXT": # move 
             print("getting next")
         print(req)
 
-        # capture after move
-        frame = bv.capture()
-        if not type(frame) == np.ndarray:
+
+        # capture position after move
+        after = bv.capture(no_inc=True)
+        if not type(after) == np.ndarray:
             break
-        stream_img("diff", frame)
-        
+        stream_img("diff", after)
 
-        if not first:
-            # compare move to previous position
-            difference = bv.subtract_pos()
-            difference_grid = bv.rescale_grid(difference)
-            move, castling, san, prob  = get_likely_move(board, difference_grid)
-            if force_move:
-                move = force_move
+        # compare move to previous position
+        difference = bv.subtract_pos(before, after)
+        difference_grid = bv.rescale_grid(difference)
+        move, castling, san, prob  = get_likely_move(board, difference_grid)
+        if force_move:
+            move = force_move
+        message = f"{str(move)[0:2]}-{str(move)[2:4]}"
+        if castling:
+            message += " O-O " + castling[0:2] + "-" + castling[2:4]
 
-            message = f"{str(move)[0:2]}-{str(move)[2:4]}"
-            if castling:
-                message += " O-O " + castling[0:2] + "-" + castling[2:4]
-            print(move)
-            webapp.push_message("mov", str(message))
-            webapp.push_message("san", str(san))
-            webapp.push_message("prb", str(prob))
-            board.push_uci(str(move))
-            stream_img("diff", difference)
+        print(move)
+
+        webapp.push_message("mov", str(message))
+        webapp.push_message("san", str(san))
+        webapp.push_message("prb", str(prob))
+
+        board.push_uci(str(move))
+        stream_img("diff", difference)
             
-        first = False
         white = not white
 
 
