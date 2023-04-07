@@ -116,14 +116,15 @@ addEventListener("keydown", (event) => {
         case "m":
             log("web","requesting move")
             move = prompt("enter a move or your files will be deleted")
-            socket.emit("client_message", "MOVE " + move)
+            if (move.length == 4) {
+                socket.emit("client_message", "MOVE " + move)
+            }
             break
         case "[":
             // log("web","requesting undo")
             // socket.emit("client_message", "UNDO ")
             break
         default:
-            log("key", event.key)
             break
     }
 });

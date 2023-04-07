@@ -18,7 +18,7 @@ def index():
 
 @socketio.on('connect')
 def connect():
-    print('client connected...')
+    # print('client connected...')
     transmitter = Thread(target=post_message, args=())
     transmitter.start()
 
