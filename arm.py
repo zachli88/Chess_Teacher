@@ -22,7 +22,7 @@ class Arm_constants:
     # units in mm:
     SIZE_SQUARE : float = 27.49
     SIZE_BOARD : float = 250
-    POS_Z_HIGHEST_PIECE : float = 50.71
+    POS_Z_HIGHEST_PIECE : float = 53.71
     POS_Z_BOARD : float = 0
     OFFSET_X1 : float = 0
     OFFSET_Y1 : float = 0
