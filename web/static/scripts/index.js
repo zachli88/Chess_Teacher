@@ -1,9 +1,16 @@
-const log = (sender, message) => {
+const log = (sender, message, color="GRAY") => {
     // Get the ul element that is a child of the .terminal div
+    switch(color) {
+        case "BLUE":
+            color = "#0000FF"
+    }
     const terminal = document.querySelector(".terminal")
     const terminalUl = document.querySelector('.terminal > ul');
     const newLi = document.createElement('li');
     newLi.textContent = `[${sender}]    \t` + message;
+    if(color != "GRAY") {
+        newLi.color = color
+    }
     terminalUl.appendChild(newLi);
     terminal.scrollTop = terminal.scrollHeight;
 }
@@ -32,8 +39,22 @@ socket.on('connect', () => {
     log(".io",'connected!');
 });
 
-socket.on('message', (data) => {
-    data = JSON.parse(data)
+var lastData = null
+
+socket.on('message', (rawData) => {
+    data = JSON.parse(rawData)
+    log(".io", data[0])
+    if (rawData ==  lastData) {
+        log("us","data was unchanged!")
+        return
+    } else {
+        log("us", "data was changed")
+        console.log("changes")
+        console.log(data)
+        console.log("vs")
+        console.log(lastData)
+        lastData = rawData
+    }
 
     switch (data[0]) {
         case "cv2":
