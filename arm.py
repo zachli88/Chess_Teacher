@@ -300,10 +300,10 @@ def rotate():
 def unrotate():
     Arm_constants.ARM.set_servo_angle(1, 0, 100, 50, wait=True)
 
-def movePieceAndRotate(square1 : str, square2 : str, capture : bool = False):
+def movePieceAndRotate(square1 : str, square2 : str, capture : str = ""):
     unrotate()
-    if (capture):
-        moveToSquare(square2)
+    if (capture != ""):
+        moveToSquare(capture)
         pickupPiece()
         
         deltax = Arm_constants.SQUARE_LOCATIONS[3][4][0] - Arm_constants.SQUARE_LOCATIONS[3][3][0]
