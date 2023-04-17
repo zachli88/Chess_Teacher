@@ -91,11 +91,18 @@ def calibrate(unsafe = False, robot_known_white = False):
     Arm_constants.ARM.stop_lite6_gripper()
 
     if not unsafe:
+        # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][0][0], Arm_constants.SQUARE_LOCATIONS[7][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        
+        Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
         Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
         Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][0][0], Arm_constants.SQUARE_LOCATIONS[7][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
         Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
         Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-        Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
 
     # code that outline board here
 
