@@ -10,6 +10,13 @@ def getMove(fen):
     stockfish.set_fen_position(fen)
     return stockfish.get_best_move()
 
+def getEval(): 
+    eval_sf = stockfish.get_evaluation()
+    print(eval_sf)
+
+def boardPrint():
+    print(stockfish.get_board_visual())
+
 
 
 
