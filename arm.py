@@ -91,11 +91,18 @@ def calibrate(unsafe = False, robot_known_white = False):
     Arm_constants.ARM.stop_lite6_gripper()
 
     if not unsafe:
+        # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][0][0], Arm_constants.SQUARE_LOCATIONS[7][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        # Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+        
+        Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
         Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
         Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][0][0], Arm_constants.SQUARE_LOCATIONS[7][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
         Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
         Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][7][0], Arm_constants.SQUARE_LOCATIONS[0][7][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
-        Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[0][0][0], Arm_constants.SQUARE_LOCATIONS[0][0][1], Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
 
     # code that outline board here
 
@@ -298,13 +305,38 @@ def rotate():
 def unrotate():
     Arm_constants.ARM.set_servo_angle(1, 0, 100, 50, wait=True)
 
+<<<<<<< HEAD
 def movePieceAndRotate(square1 : str, square2 : str, takePiece : bool):
     if takePiece:
         unrotate()
         capturePiece(square2)
+=======
+def movePieceAndRotate(square1 : str, square2 : str, capture : bool = False):
+>>>>>>> d1bc7a8085acb083ccaf832e858c6fd33c25638f
     unrotate()
+    if (capture):
+        moveToSquare(square2)
+        pickupPiece()
+        
+        deltax = Arm_constants.SQUARE_LOCATIONS[3][4][0] - Arm_constants.SQUARE_LOCATIONS[3][3][0]
+        deltay = Arm_constants.SQUARE_LOCATIONS[3][4][1] - Arm_constants.SQUARE_LOCATIONS[3][3][1]
+
+        trashx = Arm_constants.SQUARE_LOCATIONS[3][0][0] - (3 * deltax)
+        trashy = Arm_constants.SQUARE_LOCATIONS[3][0][1] - (3 * deltay)
+
+        Arm_constants.ARM.set_position(trashx, trashy, Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+        Arm_constants.ARM.open_lite6_gripper()
+        time.sleep(1)
+        Arm_constants.ARM.stop_lite6_gripper()
+
+
     movePiece(square1, square2)
     rotate()
+
+# def capturePiece(square1 : str):
+    
+#     print('hi')
 
 # def saveCalibration(): #save POZ_Z_BOARD and SQUARE_LOCATIONS
 #     choice = input("Save calibration? (y/n): ")
@@ -351,3 +383,6 @@ def testing():
     deinstantiateArm()
 
 # testing()
+print('hello')
+while 7==8:
+    print('DIE TANAY')

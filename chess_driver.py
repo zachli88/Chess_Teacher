@@ -2,6 +2,7 @@ import argparse
 import cv2
 from vision.board_vision import BoardVision
 import vision.chess_conversions as cc
+import ChessAI.ai as ai
 import web.webapp as webapp
 import arm
 import numpy as np
@@ -9,10 +10,11 @@ from threading import Thread
 import base64
 import chess
 import os
+import time
 
 white = ""
 black = ""
-
+arm_exists = True
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -21,7 +23,7 @@ def clear():
 def stream_img(name, img):
     _, buffer = cv2.imencode('.jpg', img)
     base64_str = base64.b64encode(buffer).decode()
-    webapp.push_message("cv2", name, base64_str)
+    # webapp.push_message("cv2", name, base64_str)
 
 
 def get_likely_move(game, diffs):
@@ -57,48 +59,67 @@ def start_game(src):
    
     board = chess.Board()
 
-    # arm.instantiateArm()
-    # arm.calibrate()
-    # arm.rotate()
+    if arm_exists:
+        arm.instantiateArm()
+        arm.calibrate(unsafe=False)
+        arm.rotate()
 
-    web = Thread(target=webapp.start, args =())
-    web.start()
-    webapp.push_message("cls", "")
+    print("calibration complete....")
 
-    white = True
+    time.sleep(3)
+
+    print('start arm done')
+    # web = Thread(target=webapp.start, args =())
+    # web.start()
+    # webapp.push_message("cls", "")
+
+    robots_turn = True
 
     while True:
+        print("current position: ")
+        print(board)
+        best_move = ai.getMove(board.fen())
+        print(f"{best_move} is the best move ;) ")
+
         # capture pre-move position
         before = bv.capture()
         if not type(before) == np.ndarray:
             break
-        stream_img("raw", before)
+        # stream_img("raw", before)
 
+        is_capture = False
 
         # wait for next move / other instruction from webapp
-        req = webapp.await_message()
+        # req = webapp.await_message()
+        if robots_turn:
+            req = "MOVE " + best_move[:2] + " " + best_move[2:]
+            is_capture = board.is_capture(chess.Move.from_uci(best_move))
+        else:
+            req = input("enter input (or press enter if u made a move): ")
+
         force_move = False
         reqSplit = req.split(" ")
         if reqSplit[0] == "HALT":
             print('quitting...')
-            web.join()
+            # web.join()
             break
         if reqSplit[0] == "MOVE":
             if len(reqSplit) < 3:
                 print("ERROR: NOT ENOUGH PARAMS IN MOVE (EXPECTED 3) + ", reqSplit)
                 break;
             force_move = reqSplit[1] + reqSplit[2]
-            print("making move")
-        if reqSplit[0] == "NEXT": # move 
+            # print(f"making move from  {reqSplitxz}")
+            if arm_exists:
+                arm.movePieceAndRotate(reqSplit[1], reqSplit[2])
+        if reqSplit[0] == "": # move 
             print("getting next")
-        print(req)
 
 
         # capture position after move
         after = bv.capture(no_inc=True)
         if not type(after) == np.ndarray:
             break
-        stream_img("diff", after)
+        # stream_img("diff", after)
 
         # compare move to previous position
         difference = bv.subtract_pos(before, after)
@@ -110,16 +131,16 @@ def start_game(src):
         if castling:
             message += " O-O " + castling[0:2] + "-" + castling[2:4]
 
-        print(move)
-
-        webapp.push_message("mov", str(message))
-        webapp.push_message("san", str(san))
-        webapp.push_message("prb", str(prob))
+        print(f"move detected: {str(san)}")
+        print("\n------------------")
+        # webapp.push_message("mov", str(message))
+        # webapp.push_message("san", str(san))
+        # webapp.push_message("prb", str(prob))
 
         board.push_uci(str(move))
-        stream_img("diff", difference)
+        # stream_img("diff", difference)
             
-        white = not white
+        robots_turn = not robots_turn
 
 
 def main():
