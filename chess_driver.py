@@ -3,6 +3,7 @@ import cv2
 from vision.board_vision import BoardVision
 import vision.chess_conversions as cc
 import ChessAI.ai as ai
+import chess.svg
 import web.webapp as webapp
 import arm
 import numpy as np
@@ -61,7 +62,7 @@ def start_game(src):
 
     if arm_exists:
         arm.instantiateArm()
-        arm.calibrate(unsafe=False)
+        arm.calibrate(unsafe=True)
         arm.rotate()
 
     print("calibration complete....")
@@ -74,43 +75,56 @@ def start_game(src):
     # webapp.push_message("cls", "")
 
     robots_turn = True
-
+    clear()
     while True:
-        print("current position: ")
-        print(board)
         best_move = ai.getMove(board.fen())
-        print(f"{best_move} is the best move ;) ")
+        board_eval = ai.getEval()
+        print(f"best next move: {best_move}")
+        print("\ncurrent position: ")
+        ai.boardPrint()
 
         # capture pre-move position
         before = bv.capture()
         if not type(before) == np.ndarray:
             break
+        cv2.waitKey(1)
         # stream_img("raw", before)
 
         is_capture = False
+        is_ep = False
 
         # wait for next move / other instruction from webapp
         # req = webapp.await_message()
         if robots_turn:
             req = "MOVE " + best_move[:2] + " " + best_move[2:]
             is_capture = board.is_capture(chess.Move.from_uci(best_move))
+            is_ep = board.is_en_passant(chess.Move.from_uci(best_move))
+            if is_ep:
+                print("EN PASSSSSSSSSANT")
+                is_ep = board.ep_square
+                is_ep = chess.square_name(is_ep)
+            if is_capture:
+                print("move is a capture!!! yikes")
         else:
-            req = input("enter input (or press enter if u made a move): ")
+            req = input("press ENTER on move, or command: ")
 
         force_move = False
         reqSplit = req.split(" ")
-        if reqSplit[0] == "HALT":
+        if reqSplit[0].upper() == "HALT" or reqSplit[0].upper() == "Q":
             print('quitting...')
             # web.join()
             break
-        if reqSplit[0] == "MOVE":
+        if reqSplit[0].upper() == "MOVE":
             if len(reqSplit) < 3:
                 print("ERROR: NOT ENOUGH PARAMS IN MOVE (EXPECTED 3) + ", reqSplit)
                 break;
             force_move = reqSplit[1] + reqSplit[2]
             # print(f"making move from  {reqSplitxz}")
             if arm_exists:
-                arm.movePieceAndRotate(reqSplit[1], reqSplit[2])
+                capture_square = ""
+                if is_capture:
+                    capture_square = reqSplit[2] if not is_ep else is_ep
+                arm.movePieceAndRotate(reqSplit[1], reqSplit[2], capture_square)
         if reqSplit[0] == "": # move 
             print("getting next")
 
@@ -119,7 +133,7 @@ def start_game(src):
         after = bv.capture(no_inc=True)
         if not type(after) == np.ndarray:
             break
-        # stream_img("diff", after)
+        cv2.imshow("current", after)
 
         # compare move to previous position
         difference = bv.subtract_pos(before, after)
@@ -127,17 +141,22 @@ def start_game(src):
         move, castling, san, prob  = get_likely_move(board, difference_grid)
         if force_move:
             move = force_move
+            san = board.san(chess.Move.from_uci(move))
+            print(f"insan {san}")
         message = f"{str(move)[0:2]}-{str(move)[2:4]}"
         if castling:
             message += " O-O " + castling[0:2] + "-" + castling[2:4]
 
-        print(f"move detected: {str(san)}")
-        print("\n------------------")
+        clear()
+        print("---------------------------")
+        verb = "detected by camera" if not force_move else "made by arm"
+        print(f"move {verb}: {str(san)}")
         # webapp.push_message("mov", str(message))
         # webapp.push_message("san", str(san))
         # webapp.push_message("prb", str(prob))
 
         board.push_uci(str(move))
+        cv2.imshow("difference", difference)
         # stream_img("diff", difference)
             
         robots_turn = not robots_turn
