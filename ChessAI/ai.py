@@ -1,7 +1,8 @@
 import chess
 from stockfish import Stockfish
 
-stockfish = Stockfish("/opt/homebrew/Cellar/stockfish/15.1/bin/stockfish")
+# stockfish = Stockfish("/opt/homebrew/Cellar/stockfish/15.1/bin/stockfish")
+stockfish = Stockfish("/usr/local/Cellar/stockfish/15.1/bin/stockfish")
 stockfish.set_depth(20)
 stockfish.set_skill_level(20)
 
