@@ -144,6 +144,7 @@ class BoardVision:
                 res[r][c] = total_value
         return res
 
+
     def track_board():
         pass
 

@@ -2,7 +2,7 @@ import argparse
 import cv2
 from vision.board_vision import BoardVision
 import vision.chess_conversions as cc
-import ChessAI.ai as ai
+import ai.ai as ai
 import chess.svg
 import web.webapp as webapp
 import arm
@@ -59,10 +59,11 @@ def start_game(src):
     bv = BoardVision(src)   
    
     board = chess.Board()
+    robots_turn = True
 
     if arm_exists:
         arm.instantiateArm()
-        arm.calibrate(unsafe=True)
+        arm.calibrate(unsafe=True, robot_known_white= 'W' if robots_turn else 'B')
         arm.rotate()
 
     print("calibration complete....")
@@ -74,7 +75,6 @@ def start_game(src):
     # web.start()
     # webapp.push_message("cls", "")
 
-    robots_turn = True
     clear()
     while True:
         best_move = ai.getMove(board.fen())
@@ -92,7 +92,7 @@ def start_game(src):
 
         is_capture = False
         is_ep = False
-
+        
         # wait for next move / other instruction from webapp
         # req = webapp.await_message()
         if robots_turn:
@@ -180,8 +180,8 @@ def main():
     args = parser.parse_args()
     if args.white not in ['H', 'R_ARM', 'H_ARM']:
         raise ValueError('white must be H, R_ARM, H_ARM')
-    if args.black not in ['H', 'R_ARM', 'H_ARM']:
-        raise ValueError('black must be H, R_ARM or H_ARM')
+    # if args.black not in ['H', 'R_ARM', 'H_ARM']:
+    #     raise ValueError('black must be H, R_ARM or H_ARM')
     
     white = args.white
     black = args.black
