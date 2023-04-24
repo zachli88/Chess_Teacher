@@ -52,6 +52,25 @@ def get_likely_move(game, diffs):
     if castling:
         castling = cc.get_castle_squares(str(selected_move))
 
+    squareList = []
+    while i < 64:
+        squareList.append({diffs[i/8][i%8], i/8, i%8})
+        i+=1
+
+    changed = True
+    while changed:
+        changed = False
+        i = 0
+        while i < 64:
+            if squareList[i][0] < squareList[i][1]:
+                dummy = squareList[i][0] 
+                squareList[i][0] = squareList[i][1]
+                squareList[i][1] = dummy
+                changed = True
+            i+=1
+
+    if squareList[0] 
+
     return selected_move, castling, game.san(selected_move), move_scores[0][0]/sum_scores
 
 
@@ -124,6 +143,13 @@ def start_game(src):
                 capture_square = ""
                 if is_capture:
                     capture_square = reqSplit[2] if not is_ep else is_ep
+                if is_ep:
+                    capture_square = reqSplit[2][:1]
+                    if arm.Arm_constants.ROBOT_COLOR:
+                        capture_square+=str(int(reqSplit[2][1:]) + 1)
+                    else:
+                        capture_square+=str(int(reqSplit[2][1:]) - 1)
+                print(reqSplit)
                 arm.movePieceAndRotate(reqSplit[1], reqSplit[2], capture_square)
         if reqSplit[0] == "": # move 
             print("getting next")
