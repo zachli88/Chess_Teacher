@@ -29,7 +29,7 @@ class Arm_constants:
     OFFSET_X2 : float = 0
     OFFSET_Y2 : float = 0
     SQUARE_LOCATIONS = np.empty((8, 8), dtype=tuple)
-    ROBOT_COLOR: bool = False
+    ROBOT_COLOR: bool = False # true if robot playing as white
     ARM: XArmAPI
     SQUARES_IN_ROW: int = 8
     # POS_Z_BASE_BOARD : int = 135
@@ -119,10 +119,12 @@ def calibrate(unsafe = False, robot_known_white = False):
 
 
 def saveCalibration():
-    print(Arm_constants.SQUARE_LOCATIONS)
-    print(Arm_constants.POS_Z_BOARD)
+    # print(Arm_constants.SQUARE_LOCATIONS)
+    # print(Arm_constants.POS_Z_BOARD)
+    tempTuple = (Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.SQUARE_LOCATIONS[7][7][1])
     Arm_constants.SQUARE_LOCATIONS[7][7] = (Arm_constants.SQUARE_LOCATIONS[7][7][0], Arm_constants.POS_Z_BOARD)
     np.save('calibration_data.npy', Arm_constants.SQUARE_LOCATIONS)
+    Arm_constants.SQUARE_LOCATIONS[7][7] = tempTuple
 
 def loadCalibration():
     curFile = os.path.abspath(__file__)
@@ -152,7 +154,7 @@ def reCalibrate():
     trash = input("MANUALLY MOVE ARM TO " + indiciesToSquare((0,7)) + " AND PRESS ENTER")
 
     pos = Arm_constants.ARM.position
-    print(pos)
+    # print(pos)
     Arm_constants.OFFSET_X2 = pos[0]
     Arm_constants.OFFSET_Y2 = pos[1]
     Arm_constants.SQUARE_LOCATIONS[0][7] = (Arm_constants.OFFSET_X2, Arm_constants.OFFSET_Y2)
@@ -283,7 +285,9 @@ def dropPiece():
 
 
 def moveToSquare(square : str):
+    # print(square)
     indices = squareToIndices(square)
+    # print(indices)
     Arm_constants.ARM.set_position(Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][0],
                                     Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][1],
                                       Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True) 
@@ -352,7 +356,7 @@ def testing():
     instantiateArm()
 
     calibrate()
-
+    # print(Arm_constants.SQUARE_LOCATIONS)
     rotate()
 
     command = ""
@@ -374,3 +378,5 @@ def testing():
 # print('hello')
 while 7==8:
     print('DIE TANAY')
+
+testing()
