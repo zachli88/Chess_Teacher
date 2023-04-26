@@ -29,7 +29,7 @@ class Arm_constants:
     OFFSET_X2 : float = 0
     OFFSET_Y2 : float = 0
     SQUARE_LOCATIONS = np.empty((8, 8), dtype=tuple)
-    ROBOT_COLOR: bool = False
+    ROBOT_COLOR: bool = False # true if robot playing as white
     ARM: XArmAPI
     SQUARES_IN_ROW: int = 8
     # POS_Z_BASE_BOARD : int = 135
