@@ -67,8 +67,8 @@ def get_likely_move(game, diffs):
     squareList = sorted(squareList)
     most_likely_any_score = squareList[-1][0] + squareList[-2][0]
 
-    if most_likely_any_score > CONFIDENCE_THRESHOLD * most_likely_legal_score:
-        return False
+    # if most_likely_any_score > CONFIDENCE_THRESHOLD * most_likely_legal_score:
+        # return False
 
     return most_likely_legal_move, castling, game.san(most_likely_legal_move), move_scores[0][0]/sum_scores
 
@@ -183,10 +183,10 @@ def start_game(src):
         # checks for likely move being legal
         if likely_move:
             move, castling, san, prob = likely_move
-        else:
-            print("illegal move detected!!")
-            _ = input("undo move and press ENTER before correcting") 
-            continue
+        # else:
+        #     print("illegal move detected!!")
+        #     _ = input("undo move and press ENTER before correcting") 
+        #     continue
 
         if force_move:
             move = force_move
