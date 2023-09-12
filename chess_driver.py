@@ -52,7 +52,7 @@ def get_likely_move(game, diffs):
     most_likely_legal_move = move_scores[0][1]
     most_likely_legal_score = move_scores[0][0]
 
-    # print("selected move:: ", most_likely_legal_move, "\n")
+    # look here
     castling = game.is_castling(most_likely_legal_move)
     if castling:
         castling = cc.get_castle_squares(str(most_likely_legal_move))
@@ -151,11 +151,14 @@ def start_game(src):
                 break;
             force_move = reqSplit[1] + reqSplit[2]
 
+
+            
+            # LOOK HERE for move making
             if arm_exists:
                 capture_square = ""
                 if is_capture:
                     capture_square = reqSplit[2] if not is_ep else is_ep
-                if is_ep:
+                if is_ep: # look here for En Passant
                     capture_square = reqSplit[2][:1]
                     if arm.Arm_constants.ROBOT_COLOR:
                         capture_square+=str(int(reqSplit[2][1:]) + 1)
@@ -163,7 +166,7 @@ def start_game(src):
                         capture_square+=str(int(reqSplit[2][1:]) - 1)
                 print(reqSplit)
                 arm.movePieceAndRotate(reqSplit[1], reqSplit[2], capture_square)
-                if len(reqSplit) == 5:
+                if len(reqSplit) == 5: # if castling LOOK HERE
                     arm.movePieceAndRotate(reqSplit[3], reqSplit[4])
         if reqSplit[0] == "": # move 
             print("getting next")
