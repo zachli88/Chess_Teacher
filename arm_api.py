@@ -6,11 +6,16 @@ import vision.chess_conversions as cc
 # output: returns true on success, false on failure
 def move_piece(starting_square: str, ending_square: str):
     #movePieceAndRotate
-    arm.movePieceAndRotate(starting_square, ending_square, "")
+    arm.unrotate()
+    arm.movePiece(starting_square, ending_square)
+    arm.rotate()
 
 def capture_piece(starting_square: str, ending_square: str):
     # capture part of move piece and rotate
-    arm.movePieceAndRotate(starting_square, ending_square, "capture")
+    arm.unrotate()
+    remove(ending_square)
+    arm.movePiece(starting_square, ending_square)
+    arm.rotate()
 
 def castle(side: str):
     if (side == "king"):
