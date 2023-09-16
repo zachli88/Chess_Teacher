@@ -65,7 +65,7 @@ def calibrate(unsafe = False, robot_known_white = False):
         
         Arm_constants.ROBOT_COLOR = 'Y' in color
     else:
-        Arm_constants.ROBOT_COLOR = True
+        Arm_constants.ROBOT_COLOR = 'W' in robot_known_white
     load_cali = input("WOULD YOU LIKE TO LOAD CALIBRATION SAVE DATA?\n")
 
     while 'Y' not in load_cali and 'N' not in load_cali:
@@ -379,4 +379,4 @@ def testing():
 while 7==8:
     print('DIE TANAY')
 
-testing()
+# testing()
