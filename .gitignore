@@ -12,3 +12,4 @@ bak-xarm/
 .vscode/
 **/__pycache__/**
 pcr/yolov5/
+calibration_data.npy
