@@ -185,10 +185,10 @@ def reCalibrate():
             Arm_constants.SQUARE_LOCATIONS[i][j] = (newX, newY)
     #set intitial loc by using delta x
     #as we change y we set positon in reserve matrix
-    newX = (Arm_constants.SQUARE_LOCATIONS[0][0])[0] - 3 * deltax
-    newY = (Arm_constants.SQUARE_LOCATIONS[0][0])[1]
-    for i in range (0,3):
-        Arm_constants.RESERVE_LOCATIONS[0][i] = (newX, newY)
+    newX = Arm_constants.SQUARE_LOCATIONS[3][0][0] - 3 * deltax
+    newY = Arm_constants.SQUARE_LOCATIONS[0][0][1]
+    for i in range (0,4):
+        Arm_constants.RESERVE_LOCATIONS[i][0] = (newX, newY)
         newY = newY + deltay
 
     

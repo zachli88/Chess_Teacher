@@ -1,4 +1,4 @@
-import arm
+import robot_arm.arm as arm
 import vision.chess_conversions as cc
 
 # Moves piece on starting square to a given ending square
@@ -88,8 +88,9 @@ def promote (square: str, piece: str):
     elif (piece == "K"):
         y = 3
 
-    arm.Arm_constants.ARM.set_position(arm.Arm_constants.RESERVE_LOCATIONS[0][y][0],
-                                    arm.Arm_constants.RESERVE_LOCATIONS[0][y][1],
+    print(arm.Arm_constants.RESERVE_LOCATIONS)    
+    arm.Arm_constants.ARM.set_position(arm.Arm_constants.RESERVE_LOCATIONS[y][0][0],
+                                    arm.Arm_constants.RESERVE_LOCATIONS[y][0][1],
                                     arm.Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True) 
     
     arm.Arm_constants.ARM.open_lite6_gripper()
