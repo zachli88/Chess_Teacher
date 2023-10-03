@@ -298,6 +298,11 @@ def movePiece(square1 : str, square2 : str):
     moveToSquare(square2)
     dropPiece()
 
+def capturePiece(square2 : str):
+    moveToSquare(square2)
+    pickupPiece()
+    Arm_constants.ARM.set_servo_angle(1, 90, 100, 50, wait=True)
+
 def rotate():
     Arm_constants.ARM.set_servo_angle(1, 90, 100, 50, wait=True)
 
