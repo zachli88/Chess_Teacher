@@ -3,7 +3,7 @@ import cv2
 from vision.board_vision import BoardVision
 import vision.chess_conversions as cc
 import ai.ai as ai
-import chess.svg
+# import chess.svg
 import web.webapp as webapp
 import arm
 import numpy as np
