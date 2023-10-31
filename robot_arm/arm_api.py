@@ -1,4 +1,4 @@
-import arm
+import robot_arm.arm as arm
 import vision.chess_conversions as cc
 
 # Moves piece on starting square to a given ending square
@@ -75,4 +75,50 @@ def remove(capture_square : str):
     arm.Arm_constants.ARM.open_lite6_gripper()
     arm.time.sleep(1)
     arm.Arm_constants.ARM.stop_lite6_gripper()
+
+def promote (square: str, piece: str):
+    arm.unrotate()
+    remove(square)
+    arm.rotate()
+    y = 0
+    if (piece == "R"):
+        y = 1
+    elif (piece == "B"):
+        y = 2
+    elif (piece == "K"):
+        y = 3
+
+    print(arm.Arm_constants.RESERVE_LOCATIONS)    
+    arm.Arm_constants.ARM.set_position(arm.Arm_constants.RESERVE_LOCATIONS[y][0][0],
+                                    arm.Arm_constants.RESERVE_LOCATIONS[y][0][1],
+                                    arm.Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True) 
     
+    arm.Arm_constants.ARM.open_lite6_gripper()
+    arm.time.sleep(1)
+    arm.Arm_constants.ARM.stop_lite6_gripper()
+
+#pickup_piece()
+    curPos = arm.Arm_constants.ARM.position
+    arm.Arm_constants.ARM.set_position(curPos[0], curPos[1], arm.Arm_constants.POS_Z_BOARD, 180, 0, 0, None, 100, 50, wait=True)
+
+    arm.Arm_constants.ARM.close_lite6_gripper()
+    arm.time.sleep(1)
+    arm.Arm_constants.ARM.stop_lite6_gripper()
+
+    arm.Arm_constants.ARM.set_position(curPos[0], curPos[1], arm.Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)
+
+#move piece
+    indices = arm.squareToIndices(square)
+    arm.Arm_constants.ARM.set_position(arm.Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][0],
+                                    arm.Arm_constants.SQUARE_LOCATIONS[indices[0]][indices[1]][1],
+                                      arm.Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True) 
+
+#drop_piece()
+    curPos = arm.Arm_constants.ARM.position
+    arm.Arm_constants.ARM.set_position(curPos[0], curPos[1], arm.Arm_constants.POS_Z_BOARD, 180, 0, 0, None, 100, 50, wait=True)
+
+    arm.Arm_constants.ARM.open_lite6_gripper()
+    arm.time.sleep(1)
+    arm.Arm_constants.ARM.stop_lite6_gripper()
+
+    arm.Arm_constants.ARM.set_position(curPos[0], curPos[1], arm.Arm_constants.POS_Z_HIGHEST_PIECE, 180, 0, 0, None, 100, 50, wait=True)

@@ -29,6 +29,7 @@ class Arm_constants:
     OFFSET_X2 : float = 0
     OFFSET_Y2 : float = 0
     SQUARE_LOCATIONS = np.empty((8, 8), dtype=tuple)
+    RESERVE_LOCATIONS = np.empty((4,1), dtype=tuple)
     ROBOT_COLOR: bool = False # true if robot playing as white
     ARM: XArmAPI
     SQUARES_IN_ROW: int = 8
@@ -117,6 +118,8 @@ def calibrate(unsafe = False, robot_known_white = False):
     if 'Y' in save:
         saveCalibration()
 
+    
+
 
 def saveCalibration():
     # print(Arm_constants.SQUARE_LOCATIONS)
@@ -180,7 +183,14 @@ def reCalibrate():
             newX = (Arm_constants.SQUARE_LOCATIONS[i - 1][j])[0] + deltay
             newY = (Arm_constants.SQUARE_LOCATIONS[i - 1][j])[1] + deltax
             Arm_constants.SQUARE_LOCATIONS[i][j] = (newX, newY)
-    
+    #set intitial loc by using delta x
+    #as we change y we set positon in reserve matrix
+    newX = Arm_constants.SQUARE_LOCATIONS[3][0][0] - 3 * deltax
+    newY = Arm_constants.SQUARE_LOCATIONS[0][0][1]
+    for i in range (0,4):
+        Arm_constants.RESERVE_LOCATIONS[i][0] = (newX, newY)
+        newY = newY + deltay
+
     
 
 # given a string name of square in chess notation, returns a tuple of indices into the corresponding square in the data table

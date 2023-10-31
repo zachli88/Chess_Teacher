@@ -3,7 +3,10 @@ import cv2
 from vision.board_vision import BoardVision
 import vision.chess_conversions as cc
 import ai.ai as ai
-# import chess.svg
+import chess.svg
+# import web.webapp as webapp
+import robot_arm.arm_api as arm_api
+import robot_arm.arm as arm
 import web.webapp as webapp
 import arm
 import numpy as np
@@ -81,8 +84,10 @@ def start_game(src):
 
     if arm_exists:
         arm.instantiateArm()
-        arm.calibrate(unsafe=False, robot_known_white= 'W' if robots_turn else 'B')
+        arm.calibrate(unsafe=True, robot_known_white= 'W' if robots_turn else 'B')
         arm.rotate()
+
+    arm_api.promote("e4","Q")
 
     print("calibration complete....")
 
