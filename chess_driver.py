@@ -7,6 +7,8 @@ import chess.svg
 # import web.webapp as webapp
 import robot_arm.arm_api as arm_api
 import robot_arm.arm as arm
+import web.webapp as webapp
+import arm
 import numpy as np
 from threading import Thread
 import base64
