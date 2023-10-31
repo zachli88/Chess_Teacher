@@ -1,4 +1,4 @@
-import robot_arm.arm as arm
+import arm as arm
 import vision.chess_conversions as cc
 
 # Moves piece on starting square to a given ending square

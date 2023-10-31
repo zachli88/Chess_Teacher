@@ -1,0 +1,55 @@
+# default
+
+SortedTranspositionAgent wins as WHITE: 15 (30.00%)
+StockfishAgent wins as BLACK: 24 (48.00%)
+Draws: 11 (22.00%)
+
+SortedTranspositionAgent Average time per move: 0.55s
+StockfishAgent Average time per move: 0.01s
+
+StockfishAgent wins as WHITE: 26 (52.00%)
+SortedTranspositionAgent wins as BLACK: 14 (28.00%)
+Draws: 10 (20.00%)
+
+StockfishAgent Average time per move: 0.01s
+SortedTranspositionAgent Average time per move: 0.62s
+
+
+------- 
+
+# global cache
+
+SortedTranspositionAgent wins as WHITE: 20 (40.00%)
+StockfishAgent wins as BLACK: 17 (34.00%)
+Draws: 13 (26.00%)
+
+SortedTranspositionAgent Average time per move: 0.58s
+StockfishAgent Average time per move: 0.01s
+
+StockfishAgent wins as WHITE: 18 (36.00%)
+SortedTranspositionAgent wins as BLACK: 20 (40.00%)
+Draws: 12 (24.00%)
+
+StockfishAgent Average time per move: 0.01s
+SortedTranspositionAgent Average time per move: 0.71s
+
+
+------
+
+# stalemate avoidance
+
+
+SortedTranspositionAgent wins as WHITE: 15 (30.00%)
+StockfishAgent wins as BLACK: 23 (46.00%)
+Draws: 12 (24.00%)
+
+SortedTranspositionAgent Average time per move: 0.72s
+StockfishAgent Average time per move: 0.01s
+
+
+StockfishAgent wins as WHITE: 20 (40.00%)
+SortedTranspositionAgent wins as BLACK: 15 (30.00%)
+Draws: 15 (30.00%)
+
+StockfishAgent Average time per move: 0.01s
+SortedTranspositionAgent Average time per move: 0.75s
