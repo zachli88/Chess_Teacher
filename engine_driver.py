@@ -1,110 +1,161 @@
-import tkinter as tk
-from tkinter import ttk
-from PIL import Image, ImageTk
-import chess
+from ui.minimal_ui import ChessUI
+import ai.ai as ai
+from Game import ChessGame
+from concurrent.futures import ProcessPoolExecutor
+from Agents import *
 import chess.svg
-import io
-import cairosvg
+import threading
 import queue
+import time
+import argparse
 
-def position_to_uci(position):
-    row, col = position
-    uci_col = chr(ord('a') + col)
-    uci_row = str(8 - int(row))
-    return uci_col + uci_row
+USE_UI = True
+LOG = False
 
-class ChessApp(tk.Tk):
-    def __init__(self):
-        """
-        Initializes UI in tkinter with given title, size
-        """
-        super().__init__()
+from concurrent.futures import ProcessPoolExecutor
+import time
 
-        self.title("Chess Engine UI")
-        self.geometry("400x400")
+def run_single_game(white_agent, black_agent):
+    game = ChessGame(white_agent=white_agent, black_agent=black_agent)
+    board_state = game.get_board()
 
-        self.board = chess.Board()
-        self.create_widgets()
+    w_agent_times = []
+    b_agent_times = []
 
-    def create_widgets(self):
-        """
-        Creates the widgets in the UI's frame
-        """
-        self.main_frame = ttk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+    while not board_state.is_game_over():
+        # print("\n",board_state)
+        player = game.get_next_player()
+        start_time = time.perf_counter()
+        next_move = player.get_move(board_state)
+        time_elapsed = time.perf_counter() - start_time
+        # if USE_UI:
+            # ui.update_board(board_state)
 
-        # Area for chessboard visualization
-        self.chessboard_frame = ttk.Frame(self.main_frame, padding=(0, 0, 20, 0))
-        self.chessboard_frame.grid(row=0, column=0, sticky=tk.NSEW)
-
-        self.refresh_board()
-
-    def frame_clicked(self, event):
-        square_dim = 360/8
-        piece_x = int((event.x - 20) // square_dim)
-        piece_y = int((event.y - 20) // square_dim)
-
-        uci = position_to_uci((piece_y, piece_x))
-        print("uci", uci)
-
-    def refresh_board(self,):
-        # does some fancy chess svg stuff to display self.board
-        svg_data = chess.svg.board(self.board)
-        png_data = io.BytesIO()
-        cairosvg.svg2png(bytestring=svg_data.encode('utf-8'), write_to=png_data)
-        img_data = Image.open(png_data)
-        img_data = img_data.resize((400, 400), Image.LANCZOS)
-        img_data = ImageTk.PhotoImage(img_data)
-
-        # gets rid of existing board
-        if hasattr(self, 'chessboard_label'):
-            self.chessboard_label.destroy()
-
-        # puts picture on UI
-        self.chessboard_label = ttk.Label(self.chessboard_frame, image=img_data)
-        self.chessboard_label.image = img_data
-        self.chessboard_label.bind("<Button-1>", self.frame_clicked)
-        self.chessboard_label.pack()
-
-    def next_move(self):
-        # gets first possible move, makes it
-        if self.board.legal_moves:
-            move = self.board.legal_moves.__iter__().__next__()
-            self.board.push(move)
-            self.refresh_board()
-
-    def previous_move(self):
-        # undoes last move
-        if len(self.board.move_stack) > 0:
-            self.board.pop()
-            self.refresh_board()
-
-
-class Task():
-    def __init__(self):
-        self.cmd_id = 0
-    
-    def exec(self):
-        pass
-
-class Task():
-    def __init__():
-        pass
-
-    def execute():
-        print("HELLO")
-
-def main():
-    tasks = queue.Queue()
-
-    while True:
-        task = tasks.get()
-
-        if isinstance(task, Task):
-            task.execute()
+        if player == white_agent:
+            w_agent_times.append(time_elapsed)
         else:
-            raise("Invalid Task:")
+            b_agent_times.append(time_elapsed)
         
+        board_state.push(next_move)
+
+    winner = None
+    if board_state.result() == "1-0":
+        winner = (1, 0, 0)
+    elif board_state.result() == "0-1":
+        winner = (0, 1, 0)
+    else:
+        winner = (0, 0, 1)
+
+    print("finished game!", board_state.result())
+    return winner, w_agent_times, b_agent_times
+
+
+def stockfish_ladder(ui, agent):
+    sf_agent = StockfishAgent()
+
+    print("stockfish as white", agent.__class__.__name__, "as black")
+    for i in range(1, 21):
+        sf_agent.set_skill(i)
+        result = run_single_game(ui, agent, sf_agent)
+        result = ("w wins as " + agent.__class__.__name__) if result[0][0] == 1 else "b wins as sf" if result[0][1] == 1 else "draw"
+        print("level", i, "outcome:", result)
+        if result == "b wins as sf":
+            break
+
+
+def test_games(white_agent = RandomAgent(), black_agent = RandomAgent(), game_count = 1):
+    w_total_times = []
+    b_total_times = []
+
+    with ProcessPoolExecutor() as executor:
+        future_games = [executor.submit(run_single_game, white_agent, black_agent) for _ in range(game_count)]
+        results = [future.result() for future in future_games]
+
+    # results = []
+    # for _ in range(game_count):
+    #     winner, w_times, b_times = run_single_game(white_agent, black_agent)
+    #     results.append((winner, w_times, b_times))
+        # print("finished game!", winner)
+
+    w_wins = sum(w for (w, _, _), _, _ in results)
+    b_wins = sum(b for (_, b, _), _, _ in results)
+    draws  = sum(d for (_, _, d), _, _ in results)
+
+    for _, w_times, b_times in results:
+        w_total_times.extend(w_times)
+        b_total_times.extend(b_times)
+
+    print(f"\n{white_agent.__class__.__name__} wins as WHITE: {w_wins} ({w_wins/game_count*100:.2f}%)")
+    print(f"{black_agent.__class__.__name__} wins as BLACK: {b_wins} ({b_wins/game_count*100:.2f}%)")
+    print(f"Draws: {draws} ({draws/game_count*100:.2f}%)")
+    print(f"\n{white_agent.__class__.__name__} Average time per move: {sum(w_total_times)/len(w_total_times):.2f}s")
+    print(f"{black_agent.__class__.__name__} Average time per move: {sum(b_total_times)/len(b_total_times):.2f}s")
+
+
+def main(ui, white, black):
+    game = ChessGame(white_agent=white, black_agent=black)
+    print(f"W: {game.white.__class__.__name__} B: {game.black.__class__.__name__}")
+    board_state = game.get_board()
+
+    while not board_state.is_game_over():
+        player = game.get_next_player()
+        next_move = player.get_move(board_state)
+        board_state.push(next_move)
+
+        if USE_UI:
+            ui.update_board(board_state)
+        if LOG:
+            game.print_state()
+
+    print("\nresult:",board_state.result())
+    
+
 if __name__ == "__main__":
-    app = ChessApp()
-    app.mainloop()
+
+    parser = argparse.ArgumentParser(description='robot arm that plays chess')
+    parser.add_argument('-w', '--white', type=str, default='RandomAgent', metavar="PlayerAgent",
+                        help='specify who plays white (H , R_ARM , or H_ARM)')
+    parser.add_argument('-b', '--black', type=str, default='RandomAgent', metavar="PlayerAgent",
+                        help='specify who plays black (H , R_ARM, or H_ARM)')
+    parser.add_argument('-tc', '--time-control', type=str, default='NONE', metavar="10/2",
+                    help='time control for the game in the format <minutes>/<increment> (e.g. 10/2 for 10 minutes with a 2 second increment). If not specified, the game will have no time control.')
+    parser.add_argument('--no-ui', dest='ui', action='store_false')
+    parser.add_argument('--no-logs', dest='logs', action='store_false')
+    parser.add_argument('--tests-per-side', type=int, default=0, metavar="N")
+    
+    parser.set_defaults(ui=True, logs=True)
+
+    args = parser.parse_args()
+
+    app = None if not args.ui else ChessUI()
+    agents = {Agent.__name__: Agent for Agent in Agent.__subclasses__()}
+
+    USE_UI = args.ui
+    LOG = args.logs
+
+
+    if args.white not in agents:
+        raise ValueError('white must be in ' + ', '.join(agents.keys()))
+    if args.black not in agents:
+        raise ValueError('black must be in ' + ', '.join(agents.keys()))
+    
+    white = agents[args.white]() if args.white != 'MouseAgent' else agents[args.white](app)
+    black = agents[args.black]() if args.black != 'MouseAgent' else agents[args.black](app)
+
+    if args.tests_per_side > 0:
+        print("\ntesting with", args.tests_per_side * 2, "games...")
+        test_games(white, black, args.tests_per_side)
+        print("\nswitching sides...\n")
+        test_games(black, white, args.tests_per_side)
+        exit()
+
+    # stockfish_ladder(agent=white)
+    # thread = threading.Thread(target=stockfish_ladder, args=(app, white,))
+    # thread.start()
+    thread = threading.Thread(target=main, args=(app, white, black,))
+    thread.start()
+
+
+    if USE_UI:
+        print("starting UI thread...")
+        app.mainloop()

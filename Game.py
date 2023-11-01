@@ -2,6 +2,7 @@ import chess
 from chess import Move, Board
 from Agents import RandomAgent
 import time
+
 class ChessUtils:
     WHITE = 0
     BLACK = 1
@@ -14,10 +15,10 @@ class Agent():
         pass
 
 class ChessGame():
-    def __init__(self):
+    def __init__(self, black_agent = RandomAgent(), white_agent = RandomAgent()):
         self.board = chess.Board()
-        self.black = RandomAgent()
-        self.white = RandomAgent()
+        self.black = black_agent
+        self.white = white_agent
     
     def get_board(self) -> Board:
         return self.board
