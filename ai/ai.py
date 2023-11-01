@@ -1,7 +1,12 @@
 import chess
 from stockfish import Stockfish
+from sys import platform
 
-stockfish = Stockfish("/opt/homebrew/Cellar/stockfish/15.1/bin/stockfish")
+stockfish = None
+if platform == "win32":
+    stockfish = Stockfish("./lib/stockfish-windows-x86-64-modern.exe")
+else: 
+    stockfish = Stockfish("./lib/stockfish")
 # stockfish = Stockfish("/usr/local/Cellar/stockfish/15.1/bin/stockfish")
 stockfish.set_depth(20)
 stockfish.set_skill_level(0)
