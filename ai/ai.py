@@ -4,11 +4,11 @@ from sys import platform
 
 stockfish = None
 if platform == "win32":
-    stockfish = Stockfish("./lib/stockfish-windows-x86-64-modern.exe")
+    stockfish = Stockfish("C:\\Users\\hursh\Desktop\\ECLAIR\\Chess_Teacher\\ai\\stockfish-windows-x86-64.exe")
 else: 
     stockfish = Stockfish("./lib/stockfish")
-# stockfish = Stockfish("/usr/local/Cellar/stockfish/15.1/bin/stockfish")
-stockfish.set_depth(20)
+# stockfish = Stockfish("/usr/local/Cellar/stockfish/15.1/bin/stockfish")Chess_Teacher/ai/stockfish-windows-x86-64.exe
+stockfish.set_depth(1)
 stockfish.set_skill_level(0)
 
 def getMove(fen):
