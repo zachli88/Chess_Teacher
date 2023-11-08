@@ -32,14 +32,15 @@ def train_net(input_arr, eval_arr):
     num_epochs = 1
 
     for epoch in range(num_epochs):
+        i = 0
         for inputs, targets in dataloader:
-            print("finished %s of %s", dataloader.index, len(dataloader))
+            print("finished %s of %s", i, len(dataloader))
             optim.zero_grad()  # Zero the gradients
             outputs = SimpleNN(inputs)  # Forward pass
             loss = criterion(outputs, targets)  # Calculate the loss
             loss.backward()  # Backpropagate
             optim.step()  # Update model weights
-
+            i+=1
         # Optionally, you can print the loss for each epoch
         print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item()}')
 
@@ -101,17 +102,18 @@ def main():
                 net_inputs = neural_net_input(board)
                 best_move = ai.getMove(board.fen())
                 if not fileFound:
-                    print("evaluating position ", input_params)
+                    print("evaluating position from stockfish", input_params)
                     board_eval = ai.getEval()
                     print(str(board_eval), file=f)
                 else:
+                    print("evaluating position from file", input_params)
                     board_eval = f.readline()
 
 
                 if str(board_eval)[0] == "m":
                     continue
                 pos_list.append(net_inputs)
-                eval_list.append(board_eval)
+                eval_list.append(float(board_eval))
 
                 input_params+=1
             fen = board.fen()
