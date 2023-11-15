@@ -3,11 +3,12 @@ from stockfish import Stockfish
 from sys import platform
 
 stockfish = None
-if platform == "win32":
-    stockfish = Stockfish("C:\\Users\\hursh\Desktop\\ECLAIR\\Chess_Teacher\\ai\\stockfish-windows-x86-64.exe")
-else: 
-    stockfish = Stockfish("./lib/stockfish")
-# stockfish = Stockfish("/usr/local/Cellar/stockfish/15.1/bin/stockfish")Chess_Teacher/ai/stockfish-windows-x86-64.exe
+# if platform == "win32":
+#     stockfish = Stockfish("C:\\Users\\hursh\Desktop\\ECLAIR\\Chess_Teacher\\ai\\stockfish-windows-x86-64.exe")
+# else: 
+#     stockfish = Stockfish("./lib/stockfish")
+# stockfish = Stockfish("/usr/local/Cellar/stockfish/15.1/bin/stockfish")#Chess_Teacher/ai/stockfish-windows-x86-64.exe
+stockfish = Stockfish("/opt/homebrew/bin/stockfish")
 stockfish.set_depth(1)
 stockfish.set_skill_level(0)
 

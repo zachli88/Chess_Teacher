@@ -2,6 +2,7 @@ from chess import Move, Board
 import ai.ai as ai
 import Evaluators as ev
 import random
+import functools
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Manager
@@ -26,7 +27,7 @@ def timer(func):
 class Agent():
     def __init__(self) -> None:
         self.evaluator = ev.gpt3_eval
-        self.depth = 3
+        self.depth = 5
 
     def get_move(self, board_state: Board) -> Move:
         pass
@@ -177,8 +178,9 @@ class SortedTranspositionAgent(Agent):
     def __init__(self):
         super().__init__()
         self.transposition_table = {}
-        # self.things_done = 0
+        self.things_done = 0
 
+    # @functools.lru_cache(maxsize=100000)
     def move_sorter(self, board):
         scores = {}
         for move in board.legal_moves:
@@ -190,6 +192,7 @@ class SortedTranspositionAgent(Agent):
                 scores[move] = 1
         return scores
 
+    # @functools.lru_cache(maxsize=100000)
     def minimax(self, board, depth, alpha, beta, maximizing):
         # self.things_done += 1
         board_hash = str(board.fen())
@@ -235,10 +238,13 @@ class SortedTranspositionAgent(Agent):
         return (min_eval, best_move)
 
     @timer
+    # @functools.lru_cache(maxsize=100000)
     def get_move(self, board_state: Board) -> Move:
-        # self.transposition_table = {}
+        self.transposition_table = {}
         best_move = None
+        # curr = self.things_done
         _, best_move = self.minimax(board_state, self.depth, float("-inf"), float("inf"), board_state.turn)
+        # print(self.things_done - 0, "computations done")
         return best_move
 
 
