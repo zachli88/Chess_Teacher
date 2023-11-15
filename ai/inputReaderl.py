@@ -13,42 +13,45 @@ input_size = 189
 # Create a custom neural network class
 class SimpleNN(nn.Module):
     def __init__(self):
-        super(SimpleNN, self).__init()
-        self.hidden_layer = nn.Sequential(
-            nn.Linear(input_size, 1),  # One neuron in the hidden layer
-            nn.ReLU()
-        )
+        super(SimpleNN, self).__init__()
+        self.fc1 = nn.Linear(189,1)
+        
     def forward(self, x):
-        x = self.hidden_layer(x)
+        x = (nn.functional.relu(self.fc1(x)))
         return x
 
 def train_net(input_arr, eval_arr):
-    input_tensor = torch.tensor(input_arr)
-    eval_tensor = torch.tensor(eval_arr)
+    input_tensor = torch.tensor(input_arr, dtype=torch.float)
+    eval_tensor = torch.tensor(eval_arr, dtype=torch.float)
     criterion = nn.MSELoss()
 
     dataset = TensorDataset(input_tensor, eval_tensor)
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
     num_epochs = 1
-
+    model = SimpleNN()
+    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
     for epoch in range(num_epochs):
         i = 0
         for inputs, targets in dataloader:
+            # model = SimpleNN(inputs)  # Forward pass
             print("finished %s of %s", i, len(dataloader))
-            optim.zero_grad()  # Zero the gradients
-            outputs = SimpleNN(inputs)  # Forward pass
+            optimizer.zero_grad()  # Zero the gradients
+            outputs = model.forward(inputs)
+            # print("HELLO CAN YOU HEAR ME")
+            # print("outputs ", type(outputs))
+            # print("targets ", type(targets))
             loss = criterion(outputs, targets)  # Calculate the loss
             loss.backward()  # Backpropagate
-            optim.step()  # Update model weights
+            optimizer.step()  # Update model weights
             i+=1
         # Optionally, you can print the loss for each epoch
-        print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item()}')
+        # print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item()}')
 
     # Save the trained model and optimizer state
     torch.save({
         'epoch': num_epochs,
-        'model_state_dict': SimpleNN.state_dict(),
-        'optimizer_state_dict': optim.state_dict(),
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
         'loss': loss
     }, 'model_checkpoint.pth')
 
