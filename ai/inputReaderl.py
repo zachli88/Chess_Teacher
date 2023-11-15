@@ -5,6 +5,7 @@ import torch.nn as nn
 import ai
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
+import functools
 import os
 
 # Define your input size
@@ -120,8 +121,6 @@ def main():
 
                 input_params+=1
             fen = board.fen()
-            # print(fen)
-            # print(board)
             game = pgn.read_game(pgn_file)
 
     train_net(pos_list, eval_list)
@@ -129,5 +128,26 @@ def main():
 
 
 
+
+def load_checkpoint():
+    print("testing")
+    model = SimpleNN() 
+    checkpoint = torch.load("./model_checkpoint.pth")
+    model.load_state_dict(checkpoint['model_state_dict'])
+    print(checkpoint['model_state_dict'])
+    model.eval()
+    print(checkpoint['model_state_dict'])
+    board = chess.Board()
+    board.set_fen("r2qkbnr/pp1bpppp/2n5/8/4P3/8/PPP2PPP/RNB1KBNR w KQkq - 0 5")
+    print(board)
+    net_inputs = neural_net_input(board)
+    print(net_inputs)
+    inputs = torch.tensor(net_inputs, dtype= torch.float)
+
+    with torch.no_grad():
+        output = model(inputs)
+        print(output.flatten())
+
 if __name__ == "__main__":
-    main()
+    # main()
+    load_checkpoint()
