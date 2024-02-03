@@ -18,7 +18,7 @@ class SimpleNN(nn.Module):
         self.fc1 = nn.Linear(189,1)
         
     def forward(self, x):
-        x = (nn.functional.relu(self.fc1(x)))
+        x = (nn.functional.sigmoid(self.fc1(x)))
         return x
 
 def train_net(input_arr, eval_arr):
@@ -95,6 +95,7 @@ def main():
     evaluations_file = "evaluations.txt"
     fileFound = os.path.exists(evaluations_file)
     permissions = "r+" if fileFound else "w+"
+    done = False
     with open(evaluations_file, permissions) as f:
         while (game != None) :
             board = chess.Board()
@@ -106,33 +107,50 @@ def main():
                 net_inputs = neural_net_input(board)
                 best_move = ai.getMove(board.fen())
                 if not fileFound:
-                    print("evaluating position from stockfish", input_params)
+                    if input_params % 1000 == 0:
+                       print("evaluating position from stockfish", input_params)
                     board_eval = ai.getEval()
                     print(str(board_eval), file=f)
                 else:
-                    print("evaluating position from file", input_params)
+                    if input_params % 1000 == 0:
+                        print("evaluating position from file", input_params)
                     board_eval = f.readline()
 
-
+                if input_params % 1000 == 0:
+                    print("eval: ", board_eval)
                 if str(board_eval)[0] == "m":
                     continue
                 pos_list.append(net_inputs)
                 eval_list.append(float(board_eval))
 
+                # if (input_params == 100000):
+                #     done = True
+                #     break
                 input_params+=1
             fen = board.fen()
-            game = pgn.read_game(pgn_file)
+            if done:
+                game = None
+            else:
+                game = pgn.read_game(pgn_file)
 
     train_net(pos_list, eval_list)
     
 
 
 
-
+import tensorflow as tf
 def load_checkpoint():
     print("testing")
     model = SimpleNN() 
     checkpoint = torch.load("./model_checkpoint.pth")
+    print((checkpoint['model_state_dict']['fc1.weight']))
+    for val in checkpoint['model_state_dict']:
+        print(val)
+    i = 0
+    # while i < tf.size(checkpoint['model_state_dict']['fc1.weight'][0]):
+    #     checkpoint['model_state_dict']['fc1.weight'][0][i] = 1
+    #     i+=1
+    # checkpoint['model_state_dict']['fc1.bias'][0] = 5
     model.load_state_dict(checkpoint['model_state_dict'])
     print(checkpoint['model_state_dict'])
     model.eval()
@@ -145,9 +163,9 @@ def load_checkpoint():
     inputs = torch.tensor(net_inputs, dtype= torch.float)
 
     with torch.no_grad():
-        output = model(inputs)
+        output = model.forward(inputs)
         print(output.flatten())
 
 if __name__ == "__main__":
-    # main()
+    main()
     load_checkpoint()

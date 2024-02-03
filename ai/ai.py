@@ -8,9 +8,9 @@ stockfish = None
 # else: 
 #     stockfish = Stockfish("./lib/stockfish")
 # stockfish = Stockfish("/usr/local/Cellar/stockfish/15.1/bin/stockfish")#Chess_Teacher/ai/stockfish-windows-x86-64.exe
-stockfish = Stockfish("/opt/homebrew/bin/stockfish")
+stockfish = Stockfish("C:\\Users\\hursh\Desktop\\ECLAIR\\Chess_Teacher\\ai\\stockfish-windows-x86-64.exe")
 stockfish.set_depth(1)
-stockfish.set_skill_level(0)
+# stockfish.set_skill_level(20)
 
 def getMove(fen):
     stockfish.set_fen_position(fen)
